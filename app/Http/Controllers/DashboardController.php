@@ -15,7 +15,7 @@ class DashboardController extends Controller
         $totalBorrowed = Borrowing::where('status', 'borrowed')->count();
         $totalReturned = Borrowing::where('status', 'returned')->count();
 
-        return view('dashboard', compact(
+        return view('dashboard.index', compact(
             'totalBooks',
             'totalMembers',
             'totalBorrowed',
