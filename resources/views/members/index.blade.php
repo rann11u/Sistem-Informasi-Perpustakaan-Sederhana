@@ -30,6 +30,7 @@
                     <td style="padding:10px;">{{ $member->phone ?? '-' }}</td>
                     <td style="padding:10px;">{{ $member->joined_at ? $member->joined_at->format('d/m/Y') : '-' }}</td>
                     <td style="padding:10px;">
+                        <a href="{{ route('members.show', $member->id) }}" style="color:#1565c0; margin-right:8px;">Detail</a>
                         <a href="{{ route('members.edit', $member->id) }}" style="color:#f9a825; margin-right:8px;">Edit</a>
                         <form action="{{ route('members.destroy', $member->id) }}" method="POST" style="display:inline;"
                               onsubmit="return confirm('Hapus anggota ini?')">
