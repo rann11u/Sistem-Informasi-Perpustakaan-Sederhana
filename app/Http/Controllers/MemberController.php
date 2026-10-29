@@ -14,6 +14,13 @@ class MemberController extends Controller
         return view('members.index', compact('members'));
     }
 
+    // Tampilkan detail satu anggota
+    public function show($id) {
+        $member = Member::findOrFail($id);
+
+        return view('members.show', compact('member'));
+    }
+
     // Tampilkan form tambah
     public function create() {
         return view('members.create');

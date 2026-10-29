@@ -41,7 +41,7 @@
                             <a href="{{ route('borrowings.edit', $borrowing->id) }}" style="color:#174a38; margin-right:8px;">Kembalikan</a>
                         @endif
                         <form action="{{ route('borrowings.destroy', $borrowing->id) }}" method="POST" style="display:inline;"
-                              onsubmit="return confirm('Hapus data peminjaman ini?')">
+                              onsubmit="openDeleteModal(event, 'data peminjaman ini')">
                             @csrf @method('DELETE')
                             <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0;">Hapus</button>
                         </form>
@@ -53,4 +53,3 @@
         </tbody>
     </table>
 @endsection
-
