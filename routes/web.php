@@ -7,26 +7,31 @@ use App\Http\Controllers\BookController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BorrowingController;
+use App\Http\Controllers\AuthController;
 
-// Redirect root ke dashboard
-Route::get('/', function () {
-    return redirect()->route('dashboard');
+// 1. RUTE GUEST (Hanya untuk yang BELUM login)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
 });
 
-// Dashboard
-Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+// 2. RUTE PROTEKSI (Wajib LOGIN terlebih dahulu)
+Route::middleware('auth')->group(function () {
+    // Tombol Logout
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// Buku
-Route::resource('books', BookController::class);
+    // Redirect root URL ke dashboard
+    Route::get('/', function () {
+        return redirect()->route('dashboard');
+    });
 
-// Kategori
-Route::resource('categories', CategoryController::class);
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-// Anggota
-Route::resource('members', MemberController::class);
-
-// Peminjaman
-Route::resource('borrowings', BorrowingController::class);
-
-// Pengguna
-Route::resource('users', UserController::class);
+    // Modul Perpustakaan
+    Route::resource('books', BookController::class);
+    Route::resource('categories', CategoryController::class);
+    Route::resource('members', MemberController::class);
+    Route::resource('borrowings', BorrowingController::class);
+    Route::resource('users', UserController::class);
+});
