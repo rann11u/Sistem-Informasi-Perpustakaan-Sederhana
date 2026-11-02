@@ -10,13 +10,24 @@ class DashboardController extends Controller
 {
     // Tampilkan halaman dashboard
     public function index() {
-        $totalBooks    = Book::sum('stock');
-        $totalMembers  = Member::count();
-        $totalBorrowed = Borrowing::where('status', 'borrowed')->count();
-        $totalReturned = Borrowing::where('status', 'returned')->count();
+        // 1. Jumlah Judul Buku (menghitung baris buku)
+        $totalBookTitles = Book::count();
+
+        // 2. Jumlah Stok Buku (menjumlahkan seluruh angka stok)
+        $totalBookStock  = Book::sum('stock');
+
+        // 3. Jumlah Member
+        $totalMembers    = Member::count();
+
+        // 4. Jumlah yang Sedang Dipinjam
+        $totalBorrowed   = Borrowing::where('status', 'borrowed')->count();
+
+        // Tambahan: Total yang sudah dikembalikan
+        $totalReturned   = Borrowing::where('status', 'returned')->count();
 
         return view('dashboard.index', compact(
-            'totalBooks',
+            'totalBookTitles',
+            'totalBookStock',
             'totalMembers',
             'totalBorrowed',
             'totalReturned'
