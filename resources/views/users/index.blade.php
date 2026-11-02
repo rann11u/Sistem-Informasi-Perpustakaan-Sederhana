@@ -33,7 +33,7 @@
                         <a href="{{ route('users.edit', $user->id) }}" style="color:#f9a825; margin-right:8px;">Edit</a>
                         @if (auth()->id() !== $user->id)
                             <form action="{{ route('users.destroy', $user->id) }}" method="POST" style="display:inline;"
-                                  onsubmit="openDeleteModal(event, 'Pengguna {{ addslashes($user->name) }}')">
+                                  onsubmit="return confirm('Hapus pengguna ini?')">
                                 @csrf @method('DELETE')
                                 <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0;">Hapus</button>
                             </form>
@@ -46,3 +46,4 @@
         </tbody>
     </table>
 @endsection
+

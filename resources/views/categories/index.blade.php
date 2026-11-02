@@ -26,7 +26,7 @@
                     <td style="padding:10px;">
                         <a href="{{ route('categories.edit', $category->id) }}" style="color:#f9a825; margin-right:8px;">Edit</a>
                         <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline;"
-                              onsubmit="openDeleteModal(event, 'Kategori {{ addslashes($category->name) }}')">
+                              onsubmit="return confirm('Hapus kategori ini?')">
                             @csrf @method('DELETE')
                             <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0;">Hapus</button>
                         </form>
@@ -38,3 +38,4 @@
         </tbody>
     </table>
 @endsection
+

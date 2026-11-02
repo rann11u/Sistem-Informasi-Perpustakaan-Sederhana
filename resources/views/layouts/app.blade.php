@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -127,8 +128,6 @@
     <footer class="footer">
         &copy; {{ date('Y') }} Sistem Informasi Perpustakaan Sederhana
     </footer>
-
-    @include('partials.delete-modal')
 
 </body>
 </html>
