@@ -7,6 +7,7 @@ use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
 use App\Models\Member;
 use App\Models\Book;
+use Carbon\Carbon;
 
 class BorrowingController extends Controller
 {
@@ -30,7 +31,6 @@ class BorrowingController extends Controller
         $request->validate([
             'member_id'   => 'required|exists:members,id',
             'borrow_date' => 'required|date',
-            'due_date'    => 'required|date|after_or_equal:borrow_date',
             'book_id'     => 'required|exists:books,id',
             'quantity'    => 'required|integer|min:1',
         ]);
@@ -41,12 +41,15 @@ class BorrowingController extends Controller
             return back()->with('error', 'Stok buku tidak mencukupi.')->withInput();
         }
 
+        // OTOMATIS: Hitung jatuh tempo 1 minggu (7 hari) dari tanggal pinjam
+        $dueDate = Carbon::parse($request->borrow_date)->addDays(7)->toDateString();
+
         // Buat data peminjaman
         $borrowing = Borrowing::create([
             'user_id'     => auth()->id(),
             'member_id'   => $request->member_id,
             'borrow_date' => $request->borrow_date,
-            'due_date'    => $request->due_date,
+            'due_date'    => $dueDate,
             'status'      => 'borrowed',
         ]);
 
