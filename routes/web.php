@@ -15,23 +15,36 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
 });
 
-// 2. RUTE PROTEKSI (Wajib LOGIN terlebih dahulu)
+// 2. RUTE BERSAMA (Bisa diakses Admin & Petugas yang sudah login)
 Route::middleware('auth')->group(function () {
-    // Tombol Logout
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Redirect root URL ke dashboard
     Route::get('/', function () {
         return redirect()->route('dashboard');
     });
 
-    // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Modul Perpustakaan
+    // Buku, Anggota, dan Peminjaman: Full CRUD untuk Admin & Petugas
     Route::resource('books', BookController::class);
-    Route::resource('categories', CategoryController::class);
     Route::resource('members', MemberController::class);
     Route::resource('borrowings', BorrowingController::class);
-    Route::resource('users', UserController::class);
+
+    // Kategori: Petugas & Admin sama-sama BISA MELIHAT di rute ini
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+
+    // ==========================================
+    // 3. KHUSUS ADMIN (Hanya role:admin)
+    // ==========================================
+    Route::middleware('role:admin')->group(function () {
+        // Mengelola Kategori (Tambah, Simpan, Edit, Update, Hapus)
+        Route::get('/categories/create', [CategoryController::class, 'create'])->name('categories.create');
+        Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+        Route::get('/categories/{category}/edit', [CategoryController::class, 'edit'])->name('categories.edit');
+        Route::put('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+        Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+
+        // Mengelola Pengguna (User Management)
+        Route::resource('users', UserController::class);
+    });
 });
