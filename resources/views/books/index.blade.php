@@ -33,7 +33,7 @@
                         <a href="{{ route('books.show', $book->id) }}" style="color:#1565c0; margin-right:8px;">Detail</a>
                         <a href="{{ route('books.edit', $book->id) }}" style="color:#f9a825; margin-right:8px;">Edit</a>
                         <form action="{{ route('books.destroy', $book->id) }}" method="POST" style="display:inline;"
-                              onsubmit="return confirm('Hapus buku ini?')">
+                              onsubmit="openDeleteModal(event, 'Buku {{ addslashes($book->title) }}')">
                             @csrf @method('DELETE')
                             <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0;">Hapus</button>
                         </form>
@@ -45,4 +45,3 @@
         </tbody>
     </table>
 @endsection
-
