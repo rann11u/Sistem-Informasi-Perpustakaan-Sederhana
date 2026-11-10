@@ -22,6 +22,9 @@ Route::resource('books', BookController::class);
 // Kategori
 Route::resource('categories', CategoryController::class);
 
+// Cek duplikasi data anggota (AJAX real-time)
+Route::get('/members/check-duplicate', [MemberController::class, 'checkDuplicate'])->name('members.check-duplicate');
+
 // Anggota
 Route::resource('members', MemberController::class);
 
