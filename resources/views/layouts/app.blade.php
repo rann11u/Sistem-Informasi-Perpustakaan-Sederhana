@@ -129,5 +129,7 @@
         &copy; {{ date('Y') }} Sistem Informasi Perpustakaan Sederhana
     </footer>
 
+    @include('partials.delete-modal')
+
 </body>
 </html>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Book;
 use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
 
 class BookController extends Controller
 {
@@ -41,7 +42,14 @@ class BookController extends Controller
             'year'             => 'nullable|integer|min:1000|max:' . date('Y'),
             'isbn'             => 'nullable|string|max:20|unique:books,isbn',
             'stock'            => 'required|integer|min:0',
+            'cover_image'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'synopsis'         => 'nullable|string',
         ]);
+
+        $coverPath = null;
+        if ($request->hasFile('cover_image')) {
+            $coverPath = $request->file('cover_image')->store('books', 'public');
+        }
 
         Book::create([
             'category_id'      => $request->category_id,
@@ -51,6 +59,8 @@ class BookController extends Controller
             'publication_year' => $request->publication_year ?? $request->year,
             'isbn'             => $request->isbn,
             'stock'            => $request->stock,
+            'cover_image'      => $coverPath,
+            'synopsis'         => $request->synopsis,
         ]);
 
         return redirect()->route('books.index')->with('success', 'Buku berhasil ditambahkan.');
@@ -77,7 +87,17 @@ class BookController extends Controller
             'year'             => 'nullable|integer|min:1000|max:' . date('Y'),
             'isbn'             => 'nullable|string|max:20|unique:books,isbn,' . $id,
             'stock'            => 'required|integer|min:0',
+            'cover_image'      => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'synopsis'         => 'nullable|string',
         ]);
+
+        $coverPath = $book->cover_image;
+        if ($request->hasFile('cover_image')) {
+            if ($book->cover_image && Storage::disk('public')->exists($book->cover_image)) {
+                Storage::disk('public')->delete($book->cover_image);
+            }
+            $coverPath = $request->file('cover_image')->store('books', 'public');
+        }
 
         $book->update([
             'category_id'      => $request->category_id,
@@ -87,6 +107,8 @@ class BookController extends Controller
             'publication_year' => $request->publication_year ?? $request->year,
             'isbn'             => $request->isbn,
             'stock'            => $request->stock,
+            'cover_image'      => $coverPath,
+            'synopsis'         => $request->synopsis,
         ]);
 
         return redirect()->route('books.index')->with('success', 'Buku berhasil diperbarui.');
@@ -95,6 +117,11 @@ class BookController extends Controller
     // Delete - Hapus buku
     public function destroy($id) {
         $book = Book::findOrFail($id);
+
+        if ($book->cover_image && Storage::disk('public')->exists($book->cover_image)) {
+            Storage::disk('public')->delete($book->cover_image);
+        }
+
         $book->delete();
 
         return redirect()->route('books.index')->with('success', 'Buku berhasil dihapus.');
