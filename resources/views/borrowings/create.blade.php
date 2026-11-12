@@ -39,16 +39,31 @@
 
         <div style="margin-bottom:14px;">
             <label style="display:block; margin-bottom:4px; font-weight:bold;">Tanggal Pinjam <span style="color:red">*</span></label>
-            <input type="date" name="borrow_date" value="{{ old('borrow_date', date('Y-m-d')) }}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
+            <input type="date" id="borrow_date" name="borrow_date" value="{{ old('borrow_date', date('Y-m-d')) }}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
         </div>
 
+        {{-- JATUH TEMPO OTOMATIS (READONLY) --}}
         <div style="margin-bottom:20px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Jatuh Tempo <span style="color:red">*</span></label>
-            <input type="date" name="due_date" value="{{ old('due_date') }}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
+            <label style="display:block; margin-bottom:4px; font-weight:bold;">Jatuh Tempo (Otomatis 1 Minggu)</label>
+            <input type="date" id="due_date" name="due_date" value="{{ old('due_date', date('Y-m-d', strtotime('+7 days'))) }}" style="width:100%; padding:8px; border:1px solid #ddd; background:#f4f6f9; border-radius:6px; color:#555;" readonly>
+            <small style="color:#666; font-size:12px;">*Jatuh tempo otomatis dihitung 1 minggu (7 hari) dari tanggal pinjam.</small>
         </div>
 
         <button type="submit" style="background:#174a38; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Simpan</button>
-        <a href="{{ route('borrowings.index') }}" style="margin-left:12px; color:#555;">Batal</a>
+        <a href="{{ route('borrowings.index') }}" style="margin-left:12px; color:#555; text-decoration:none;">Batal</a>
     </form>
-@endsection
 
+    {{-- Script untuk update otomatis jatuh tempo jika tanggal pinjam diubah --}}
+    <script>
+        document.getElementById('borrow_date').addEventListener('change', function() {
+            if (this.value) {
+                const borrowDate = new Date(this.value);
+                borrowDate.setDate(borrowDate.getDate() + 7);
+                const yyyy = borrowDate.getFullYear();
+                const mm = String(borrowDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(borrowDate.getDate()).padStart(2, '0');
+                document.getElementById('due_date').value = `${yyyy}-${mm}-${dd}`;
+            }
+        });
+    </script>
+@endsection
