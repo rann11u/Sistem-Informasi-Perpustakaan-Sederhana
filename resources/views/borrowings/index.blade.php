@@ -120,6 +120,9 @@
                             <a href="{{ route('borrowings.edit', $borrowing->id) }}" style="color:#174a38; margin-right:8px; text-decoration:none; font-weight:bold;">Kembalikan</a>
                         @endif
 
+                        {{-- Tombol Cetak / Download Invoice PDF --}}
+                        <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" style="color:#6d28d9; margin-right:8px; text-decoration:none; font-weight:bold;">Invoice PDF</a>
+
                         {{-- Tombol Hapus Jika Status Selesai / Dibatalkan --}}
                         @if (in_array($borrowing->status, ['returned', 'cancelled']))
                             <form action="{{ route('borrowings.destroy', $borrowing->id) }}" method="POST" style="display:inline;"

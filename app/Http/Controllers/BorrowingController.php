@@ -172,4 +172,13 @@ class BorrowingController extends Controller
 
         return redirect()->route('borrowings.index')->with('success', 'Data peminjaman berhasil dihapus.');
     }
+
+    // Cetak / Download Bukti Pinjam (Invoice PDF) untuk Petugas & Admin
+    public function invoice($id) {
+        $borrowing = Borrowing::with(['details.book.category', 'member', 'user'])->findOrFail($id);
+        $member    = $borrowing->member;
+        $user      = $borrowing->user ?? auth()->user();
+
+        return view('member.invoice', compact('borrowing', 'member', 'user'));
+    }
 }
