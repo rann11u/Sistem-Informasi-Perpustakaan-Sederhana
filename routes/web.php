@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     // Riwayat Peminjaman & Invoice PDF Member
     Route::get('/riwayat', [BorrowingHistoryController::class, 'index'])->name('member.history');
     Route::get('/riwayat/{id}/invoice', [BorrowingHistoryController::class, 'invoice'])->name('member.history.invoice');
+    Route::post('/riwayat/{id}/extend', [BorrowingHistoryController::class, 'extend'])->name('member.history.extend');
 
     Route::get('/profil', [MemberProfileController::class, 'show'])->name('member.profile');
     Route::put('/profil', [MemberProfileController::class, 'update'])->name('member.profile.update');
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function () {
         // Peminjaman & Aksi Konfirmasi Booking Petugas
         Route::post('/borrowings/{borrowing}/confirm-pickup', [BorrowingController::class, 'confirmPickup'])->name('borrowings.confirm-pickup');
         Route::post('/borrowings/{borrowing}/cancel-booking', [BorrowingController::class, 'cancelBooking'])->name('borrowings.cancel-booking');
+        Route::get('/borrowings/{borrowing}/invoice', [BorrowingController::class, 'invoice'])->name('borrowings.invoice');
         Route::resource('borrowings', BorrowingController::class);
 
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');

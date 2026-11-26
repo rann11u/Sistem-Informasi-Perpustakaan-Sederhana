@@ -14,7 +14,7 @@
             Semua Data
         </a>
         <a href="{{ route('borrowings.index', ['status' => 'booked']) }}" style="padding:6px 14px; border-radius:20px; font-size:13px; text-decoration:none; {{ request('status') === 'booked' ? 'background:#d97706; color:white; font-weight:bold;' : 'background:#fef3c7; color:#92400e;' }}">
-            Booking Online ({{ $countBooked }})
+            Daftar Booking Masuk ({{ $countBooked }})
         </a>
         <a href="{{ route('borrowings.index', ['status' => 'borrowed']) }}" style="padding:6px 14px; border-radius:20px; font-size:13px; text-decoration:none; {{ request('status') === 'borrowed' ? 'background:#1565c0; color:white; font-weight:bold;' : 'background:#e0f2fe; color:#0369a1;' }}">
             Sedang Dipinjam ({{ $countBorrowed }})
@@ -104,7 +104,7 @@
                             <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Konfirmasi bahwa member telah datang dan buku telah diserahkan?')">
                                 @csrf
                                 <button type="submit" style="background:#16a34a; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer; margin-right:6px;">
-                                    Serahkan Buku
+                                    Konfirmasi Pengambilan / Serahkan Buku
                                 </button>
                             </form>
                             <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Batalkan booking ini dan kembalikan stok buku?')">
@@ -119,6 +119,9 @@
                         @if ($borrowing->status === 'borrowed')
                             <a href="{{ route('borrowings.edit', $borrowing->id) }}" style="color:#174a38; margin-right:8px; text-decoration:none; font-weight:bold;">Kembalikan</a>
                         @endif
+
+                        {{-- Tombol Cetak / Download Invoice PDF --}}
+                        <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" style="color:#6d28d9; margin-right:8px; text-decoration:none; font-weight:bold;">Invoice PDF</a>
 
                         {{-- Tombol Hapus Jika Status Selesai / Dibatalkan --}}
                         @if (in_array($borrowing->status, ['returned', 'cancelled']))

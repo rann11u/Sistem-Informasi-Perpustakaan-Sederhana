@@ -4,7 +4,14 @@
         <a href="{{ route('books.index') }}" {{ request()->routeIs('books.*') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Buku</a>
         <a href="{{ route('categories.index') }}" {{ request()->routeIs('categories.*') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Kategori</a>
         <a href="{{ route('members.index') }}" {{ request()->routeIs('members.*') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Anggota</a>
-        <a href="{{ route('borrowings.index') }}" {{ request()->routeIs('borrowings.*') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Peminjaman</a>
+        <a href="{{ route('borrowings.index') }}" {{ request()->routeIs('borrowings.*') && request('status') !== 'booked' ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Peminjaman</a>
+        @php $pendingBookings = \App\Models\Borrowing::where('status', 'booked')->count(); @endphp
+        <a href="{{ route('borrowings.index', ['status' => 'booked']) }}" {{ request()->routeIs('borrowings.*') && request('status') === 'booked' ? 'style=background:#fef3c7;color:#92400e;font-weight:bold;' : '' }}>
+            Daftar Booking Masuk
+            @if($pendingBookings > 0)
+                <span style="background:#d97706; color:white; padding:1px 6px; border-radius:10px; font-size:11px; margin-left:4px;">{{ $pendingBookings }}</span>
+            @endif
+        </a>
 
         {{-- HANYA ADMIN YANG DAPAT MELIHAT MENU KELOLA PENGGUNA --}}
         @if (Auth::check() && Auth::user()->role === 'admin')
