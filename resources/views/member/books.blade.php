@@ -173,6 +173,8 @@
     <header class="header">
         <h1>Sistem Informasi Perpustakaan</h1>
         <div class="user-nav">
+            <a href="{{ route('member.books') }}" style="color:white; text-decoration:none; font-weight:bold; font-size:14px; margin-right:4px;">Katalog Buku</a>
+            <a href="{{ route('member.profile') }}" style="color:#dcebe3; text-decoration:none; font-size:14px; margin-right:12px;">Profil Saya</a>
             <span>Halo, <strong>{{ Auth::user()->name }}</strong></span>
             @if(Auth::user()->member)
                 <span class="badge-code">{{ Auth::user()->member->member_code }}</span>
