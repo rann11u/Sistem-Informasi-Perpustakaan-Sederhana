@@ -126,6 +126,30 @@
             font-size: 14px;
         }
 
+        .alert-error {
+            background-color: #fde8e7;
+            color: #a12222;
+            padding: 14px 18px;
+            border-radius: 8px;
+            border: 1px solid #f8b4b4;
+            margin-bottom: 24px;
+            font-size: 14px;
+        }
+
+        /* Banner Status Kuota Buku */
+        .quota-banner {
+            background-color: white;
+            padding: 14px 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
         /* Filter & Search Bar */
         .filter-card {
             background-color: white;
@@ -264,7 +288,7 @@
             border-radius: 6px;
             font-size: 12px;
             font-weight: bold;
-            margin-top: 14px;
+            margin-top: 10px;
         }
 
         .in-stock {
@@ -277,6 +301,36 @@
             background-color: #fde8e7;
             color: #a12222;
             border: 1px solid #f8b4b4;
+        }
+
+        /* Tombol Booking */
+        .btn-book {
+            width: 100%;
+            background-color: #174a38;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-book:hover {
+            background-color: #103629;
+        }
+
+        .btn-book-disabled {
+            width: 100%;
+            background-color: #f3f4f6;
+            color: #9ca3af;
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            cursor: not-allowed;
         }
 
         .empty-state {
@@ -310,7 +364,6 @@
                 @if(Auth::user()->member && Auth::user()->member->photo)
                     <img src="{{ asset('storage/' . Auth::user()->member->photo) }}" alt="Foto Profil">
                 @else
-                    {{-- Ikon profil kosong --}}
                     <svg class="empty-avatar" viewBox="0 0 24 24">
                         <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
@@ -336,6 +389,35 @@
                 {{ session('success') }}
             </div>
         @endif
+
+        @if(session('error'))
+            <div class="alert-error">
+                {{ session('error') }}
+            </div>
+        @endif
+
+        {{-- Status Kuota Buku Member --}}
+        <div class="quota-banner">
+            <div>
+                <span style="font-size: 14px; color: #374151;">
+                    Buku Aktif Anda: <strong>{{ $activeBookingsCount }} / 5 buku</strong>
+                </span>
+                <span style="font-size: 13px; color: #6b7280; margin-left: 8px;">
+                    (Maksimal pinjam + booking adalah 5 buku. Batas pengambilan booking: 1 hari)
+                </span>
+            </div>
+            <div>
+                @if($activeBookingsCount >= 5)
+                    <span style="background: #fde8e7; color: #a12222; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+                        Kuota Penuh
+                    </span>
+                @else
+                    <span style="background: #e5f1eb; color: #174a38; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold;">
+                        Sisa Kuota: {{ 5 - $activeBookingsCount }} buku
+                    </span>
+                @endif
+            </div>
+        </div>
 
         {{-- Form Pencarian & Filter Kategori --}}
         <div class="filter-card">
@@ -393,13 +475,30 @@
                         @if($book->isbn)
                             <div class="book-meta" style="font-size: 12px; color: #6b7280;">ISBN: {{ $book->isbn }}</div>
                         @endif
-                    </div>
-                    <div>
+                        
                         {{-- Status Stok Buku --}}
+                        <div>
+                            @if($book->stock > 0)
+                                <span class="stock-badge in-stock">Tersedia {{ $book->stock }} buku</span>
+                            @else
+                                <span class="stock-badge out-of-stock">Stok Habis</span>
+                            @endif
+                        </div>
+                    </div>
+
+                    {{-- Tombol Booking Buku --}}
+                    <div style="margin-top: 16px;">
                         @if($book->stock > 0)
-                            <span class="stock-badge in-stock">Tersedia {{ $book->stock }} buku</span>
+                            @if($activeBookingsCount < 5)
+                                <form action="{{ route('member.books.book', $book->id) }}" method="POST" onsubmit="return confirm('Apakah Anda ingin membooking buku \'{{ addslashes($book->title) }}\'?\n\nBatas pengambilan adalah 1 hari (24 jam) di perpustakaan.')">
+                                    @csrf
+                                    <button type="submit" class="btn-book">Booking Buku</button>
+                                </form>
+                            @else
+                                <button type="button" class="btn-book-disabled" title="Batas kuota 5 buku tercapai" disabled>Kuota Penuh (Maks 5)</button>
+                            @endif
                         @else
-                            <span class="stock-badge out-of-stock">Stok Habis</span>
+                            <button type="button" class="btn-book-disabled" disabled>Stok Habis</button>
                         @endif
                     </div>
                 </div>
