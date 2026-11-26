@@ -30,8 +30,9 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Halaman Khusus Member: Katalog Buku & Profil
+    // Halaman Khusus Member: Katalog Buku, Booking, & Profil
     Route::get('/katalog', [MemberBookController::class, 'index'])->name('member.books');
+    Route::post('/katalog/book/{book}', [MemberBookController::class, 'book'])->name('member.books.book');
 
     Route::get('/profil', [MemberProfileController::class, 'show'])->name('member.profile');
     Route::put('/profil', [MemberProfileController::class, 'update'])->name('member.profile.update');
@@ -51,7 +52,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('books', BookController::class);
         Route::resource('members', MemberController::class);
+        
+        // Peminjaman & Aksi Konfirmasi Booking Petugas
+        Route::post('/borrowings/{borrowing}/confirm-pickup', [BorrowingController::class, 'confirmPickup'])->name('borrowings.confirm-pickup');
+        Route::post('/borrowings/{borrowing}/cancel-booking', [BorrowingController::class, 'cancelBooking'])->name('borrowings.cancel-booking');
         Route::resource('borrowings', BorrowingController::class);
+
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     });
 

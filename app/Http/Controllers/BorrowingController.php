@@ -11,14 +11,26 @@ use Carbon\Carbon;
 
 class BorrowingController extends Controller
 {
-    // Read - Tampilkan semua peminjaman
-    public function index() {
-        $borrowings = Borrowing::all();
+    // Read - Tampilkan semua peminjaman dengan filter tab
+    public function index(Request $request) {
+        $query = Borrowing::with(['member', 'user', 'details.book']);
 
-        return view('borrowings.index', compact('borrowings'));
+        // Filter status jika dipilih
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $borrowings = $query->latest()->get();
+
+        // Hitung ringkasan status untuk tab
+        $countBooked   = Borrowing::where('status', 'booked')->count();
+        $countBorrowed = Borrowing::where('status', 'borrowed')->count();
+        $countReturned = Borrowing::where('status', 'returned')->count();
+
+        return view('borrowings.index', compact('borrowings', 'countBooked', 'countBorrowed', 'countReturned'));
     }
 
-    // Tampilkan form tambah peminjaman
+    // Tampilkan form tambah peminjaman langsung (offline)
     public function create() {
         $members = Member::all();
         $books   = Book::where('stock', '>', 0)->get();
@@ -26,7 +38,7 @@ class BorrowingController extends Controller
         return view('borrowings.create', compact('members', 'books'));
     }
 
-    // Store - Simpan peminjaman baru
+    // Store - Simpan peminjaman langsung
     public function store(Request $request) {
         $request->validate([
             'member_id'   => 'required|exists:members,id',
@@ -35,13 +47,26 @@ class BorrowingController extends Controller
             'quantity'    => 'required|integer|min:1',
         ]);
 
+        // Validasi kuota maksimal 5 buku per member
+        $activeCount = Borrowing::where('member_id', $request->member_id)
+            ->whereIn('status', ['borrowed', 'booked'])
+            ->with('details')
+            ->get()
+            ->sum(function ($b) {
+                return $b->details->sum('quantity');
+            });
+
+        if (($activeCount + $request->quantity) > 5) {
+            return back()->with('error', "Gagal! Member ini sudah memiliki {$activeCount} buku aktif (dipinjam/booking). Batas maksimal adalah 5 buku.")->withInput();
+        }
+
         // Cek stok buku
         $book = Book::findOrFail($request->book_id);
         if ($book->stock < $request->quantity) {
             return back()->with('error', 'Stok buku tidak mencukupi.')->withInput();
         }
 
-        // OTOMATIS: Hitung jatuh tempo 1 minggu (7 hari) dari tanggal pinjam
+        // Otomatis: Jatuh tempo 1 minggu (7 hari) dari tanggal peminjaman
         $dueDate = Carbon::parse($request->borrow_date)->addDays(7)->toDateString();
 
         // Buat data peminjaman
@@ -69,9 +94,46 @@ class BorrowingController extends Controller
 
     // Show - Detail peminjaman
     public function show($id) {
-        $borrowing = Borrowing::findOrFail($id);
+        $borrowing = Borrowing::with(['member', 'user', 'details.book'])->findOrFail($id);
 
         return view('borrowings.show', compact('borrowing'));
+    }
+
+    // Konfirmasi Pengambilan Buku Booking oleh Petugas
+    public function confirmPickup($id) {
+        $borrowing = Borrowing::findOrFail($id);
+
+        if ($borrowing->status !== 'booked') {
+            return back()->with('error', 'Status transaksi ini bukan booking.');
+        }
+
+        // Ubah status menjadi borrowed, catat petugas penyerah, perbarui tanggal pinjam & due date
+        $borrowing->status      = 'borrowed';
+        $borrowing->user_id     = auth()->id();
+        $borrowing->borrow_date = now()->toDateString();
+        $borrowing->due_date    = now()->addDays(7)->toDateString();
+        $borrowing->save();
+
+        return back()->with('success', 'Buku berhasil diserahkan kepada member. Status berubah menjadi Dipinjam.');
+    }
+
+    // Batalkan Booking (misal lewat 1 hari atau member membatalkan)
+    public function cancelBooking($id) {
+        $borrowing = Borrowing::with('details.book')->findOrFail($id);
+
+        if ($borrowing->status !== 'booked') {
+            return back()->with('error', 'Hanya transaksi berstatus booking yang dapat dibatalkan.');
+        }
+
+        // Kembalikan stok setiap buku yang dibooking
+        foreach ($borrowing->details as $detail) {
+            $detail->book->increment('stock', $detail->quantity);
+        }
+
+        $borrowing->status = 'cancelled';
+        $borrowing->save();
+
+        return back()->with('success', 'Booking berhasil dibatalkan dan stok buku telah dikembalikan.');
     }
 
     // Tampilkan form pengembalian buku

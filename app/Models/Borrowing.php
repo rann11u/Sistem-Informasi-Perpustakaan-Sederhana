@@ -13,6 +13,7 @@ class Borrowing extends Model
         'member_id',
         'borrow_date',
         'due_date',
+        'pickup_deadline',
         'return_date',
         'status',
     ];
@@ -20,9 +21,10 @@ class Borrowing extends Model
     protected function casts(): array
     {
         return [
-            'borrow_date' => 'date',
-            'due_date' => 'date',
-            'return_date' => 'date',
+            'borrow_date'     => 'date',
+            'due_date'        => 'date',
+            'pickup_deadline' => 'datetime',
+            'return_date'     => 'date',
         ];
     }
 
