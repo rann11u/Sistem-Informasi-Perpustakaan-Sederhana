@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MemberProfileController;
+use App\Http\Controllers\MemberBookController;
 use App\Models\Book;
 
 // ==========================================
@@ -30,10 +31,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
     // Halaman Khusus Member: Katalog Buku & Profil
-    Route::get('/katalog', function () {
-        $books = Book::with('category')->get();
-        return view('member.books', compact('books'));
-    })->name('member.books');
+    Route::get('/katalog', [MemberBookController::class, 'index'])->name('member.books');
 
     Route::get('/profil', [MemberProfileController::class, 'show'])->name('member.profile');
     Route::put('/profil', [MemberProfileController::class, 'update'])->name('member.profile.update');
