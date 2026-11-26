@@ -16,6 +16,7 @@ class Member extends Model
         'phone',
         'photo',
         'address',
+        'photo',
         'joined_at',
     ];
 
