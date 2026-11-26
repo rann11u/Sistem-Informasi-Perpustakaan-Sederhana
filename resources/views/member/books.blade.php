@@ -358,6 +358,7 @@
 
         <div class="user-nav">
             <a href="{{ route('member.books') }}" class="nav-link active">Katalog Buku</a>
+            <a href="{{ route('member.history') }}" class="nav-link">Riwayat Pinjam</a>
 
             {{-- Tombol Profil: Menampilkan foto yang di-up, kosong jika belum ada --}}
             <a href="{{ route('member.profile') }}" class="btn-profile-avatar" title="Profil Saya">

@@ -10,6 +10,7 @@ use App\Http\Controllers\BorrowingController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\MemberProfileController;
 use App\Http\Controllers\MemberBookController;
+use App\Http\Controllers\BorrowingHistoryController;
 use App\Models\Book;
 
 // ==========================================
@@ -30,9 +31,13 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    // Halaman Khusus Member: Katalog Buku, Booking, & Profil
+    // Halaman Khusus Member: Katalog Buku, Booking, Riwayat & Profil
     Route::get('/katalog', [MemberBookController::class, 'index'])->name('member.books');
     Route::post('/katalog/book/{book}', [MemberBookController::class, 'book'])->name('member.books.book');
+
+    // Riwayat Peminjaman & Invoice PDF Member
+    Route::get('/riwayat', [BorrowingHistoryController::class, 'index'])->name('member.history');
+    Route::get('/riwayat/{id}/invoice', [BorrowingHistoryController::class, 'invoice'])->name('member.history.invoice');
 
     Route::get('/profil', [MemberProfileController::class, 'show'])->name('member.profile');
     Route::put('/profil', [MemberProfileController::class, 'update'])->name('member.profile.update');
