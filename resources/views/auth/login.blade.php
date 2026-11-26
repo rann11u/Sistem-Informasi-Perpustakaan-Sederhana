@@ -179,6 +179,10 @@
             {{-- Tombol Masuk --}}
             <button type="submit" class="btn-submit">Masuk</button>
         </form>
+
+        <div style="text-align: center; margin-top: 20px; font-size: 13px; color: #6b7280;">
+            Belum memiliki akun anggota? <a href="{{ route('register') }}" style="color: #174a38; font-weight: bold; text-decoration: none;">Daftar di sini</a>
+        </div>
     </div>
 
 </body>
