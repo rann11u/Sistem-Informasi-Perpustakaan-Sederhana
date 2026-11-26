@@ -1,0 +1,358 @@
+/* Hallmark · shape: app screen · genre: modern-minimal · theme: Dusk (by request) · redesign: full
+ * nav: none (auth) · signature: smoked glass panel over library photograph · states: default, hover, focus, error, success · dusk: fog/periwinkle-apricot/glass · built: Hallmark · v2.0.0 */
+/* Hallmark · pre-emit critique: P5 H5 E5 S5 R5 V4 · weakest: V, moved from Atelier light paper to Dusk dark smoked-glass over the user's library photograph */
+@import url("./tokens.css");
+@import url("./base.css");
+
+:root {
+  --auth-max: 27.5rem;
+  --auth-max-wide: 34rem;
+  --glass-panel: color-mix(in oklab, var(--color-paper) 76%, transparent);
+  --glass-input: color-mix(in oklab, var(--color-shade) 52%, transparent);
+  --glass-input-hover: color-mix(in oklab, var(--color-shade) 68%, transparent);
+  --glass-border: color-mix(in oklab, var(--color-light) 18%, transparent);
+  --glass-row-rule: color-mix(in oklab, var(--color-light) 10%, transparent);
+  --scrim-edge: color-mix(in oklab, var(--color-shade) 72%, transparent);
+  --scrim-mid: color-mix(in oklab, var(--color-paper) 42%, transparent);
+}
+
+body {
+  position: relative;
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: var(--space-lg) var(--gutter);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* Full-bleed Dusk photograph backdrop + calm dark-slate scrim */
+.dusk-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.dusk-backdrop__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 42%;
+  filter: contrast(1.04) saturate(1.03) brightness(0.86);
+}
+
+.dusk-backdrop__scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 70% at 50% 45%, var(--scrim-mid), var(--scrim-edge) 100%),
+    linear-gradient(to bottom, transparent 40%, var(--color-paper) 98%);
+}
+
+/* Single centered Dusk form shell */
+.auth-shell {
+  position: relative;
+  z-index: var(--z-base);
+  width: 100%;
+  max-width: var(--auth-max);
+}
+
+.auth-shell--wide {
+  max-width: var(--auth-max-wide);
+}
+
+/* Left editorial/calm column */
+.auth-aside {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.auth-wordmark {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-md);
+  color: var(--color-ink);
+  letter-spacing: var(--tracking-display);
+}
+
+.auth-heading {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: clamp(2rem, 3.4vw, 2.75rem);
+  line-height: 1.04;
+  letter-spacing: var(--tracking-display);
+  color: var(--color-ink);
+  max-width: 14ch;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+
+.auth-lede {
+  font-size: var(--text-md);
+  line-height: 1.55;
+  color: var(--color-ink-2);
+  max-width: 38ch;
+}
+
+.auth-index {
+  margin-top: var(--space-sm);
+  border-top: var(--rule-hair) solid var(--glass-border);
+}
+
+.auth-index-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-sm) 0;
+  border-bottom: var(--rule-hair) solid var(--glass-row-rule);
+  font-size: var(--text-sm);
+}
+
+.auth-index-key {
+  color: var(--color-muted);
+}
+
+.auth-index-val {
+  color: var(--color-ink);
+  text-align: right;
+}
+
+.auth-index-val--accent {
+  color: var(--color-accent);
+}
+
+.auth-index-val--apricot {
+  color: var(--color-accent-2);
+}
+
+/* Right smoked-glass card */
+.auth-glass {
+  background: var(--glass-panel);
+  border-radius: var(--radius-card);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.35);
+  box-shadow: var(--glass-hi), var(--shadow-card);
+  padding: var(--space-xl);
+}
+
+.auth-card-head {
+  padding-bottom: var(--space-md);
+  margin-bottom: var(--space-lg);
+  border-bottom: var(--rule-hair) solid var(--glass-row-rule);
+}
+
+.auth-card-title {
+  font-family: var(--font-display);
+  font-weight: var(--display-weight);
+  font-size: var(--text-xl);
+  color: var(--color-ink);
+  letter-spacing: var(--tracking-display);
+  line-height: 1.15;
+}
+
+.auth-card-sub {
+  margin-top: var(--space-2xs);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}
+
+/* Alerts */
+.alert {
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+  border: var(--rule-hair) solid var(--glass-border);
+  border-radius: var(--radius-inner);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  background-color: var(--glass-input);
+}
+
+.alert-error {
+  border-color: var(--color-accent-2);
+  color: var(--color-accent-2);
+}
+
+.alert-success {
+  border-color: var(--color-accent);
+  color: var(--color-accent-hi);
+}
+
+/* Form & 8-state controls */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-md);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
+  min-width: 0;
+}
+
+.form-label {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-ink-2);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-xs);
+}
+
+.field-required {
+  font-size: var(--text-xs);
+  color: var(--color-accent-2);
+}
+
+.form-control {
+  width: 100%;
+  min-height: 2.75rem;
+  padding: var(--space-xs) var(--space-sm);
+  background-color: var(--glass-input);
+  color: var(--color-ink);
+  border: var(--rule-hair) solid var(--glass-border);
+  border-radius: var(--radius-inner);
+  outline: 2px solid transparent;
+  outline-offset: -3px;
+  font-size: var(--text-md);
+  transition: background-color var(--dur-micro) var(--ease-out), border-color var(--dur-micro) var(--ease-out);
+}
+
+textarea.form-control {
+  min-height: 4.5rem;
+  resize: vertical;
+  line-height: 1.45;
+}
+
+.form-control::placeholder {
+  color: var(--color-muted);
+}
+
+@media (hover: hover) {
+  .form-control:hover:not(:disabled) {
+    background-color: var(--glass-input-hover);
+  }
+}
+
+.form-control:focus-visible {
+  outline-color: var(--color-focus);
+  border-color: var(--color-accent);
+  background-color: var(--glass-input-hover);
+}
+
+.form-control:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.form-control[aria-invalid="true"] {
+  border-color: var(--color-accent-2);
+}
+
+.field-hint {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.field-error {
+  font-size: var(--text-xs);
+  color: var(--color-accent-2);
+  line-height: 1.4;
+}
+
+/* Dusk periwinkle pill primary action */
+.btn-submit {
+  width: 100%;
+  min-height: 3rem;
+  margin-top: var(--space-xs);
+  padding: 0 var(--space-lg);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent);
+  color: var(--color-accent-ink);
+  font-size: var(--text-md);
+  font-weight: 600;
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--color-light) 35%, transparent);
+  cursor: pointer;
+  transition: background-color var(--dur-micro) var(--ease-out), transform var(--dur-micro) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .btn-submit:hover:not(:disabled) {
+    background-color: var(--color-accent-hi);
+  }
+}
+
+.btn-submit:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Footer link */
+.auth-footer {
+  margin-top: var(--space-lg);
+  padding-top: var(--space-md);
+  border-top: var(--rule-hair) solid var(--glass-row-rule);
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.auth-link {
+  color: var(--color-accent);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in oklab, var(--color-accent) 45%, transparent);
+  text-underline-offset: 0.2em;
+  transition: color var(--dur-micro) var(--ease-out);
+}
+
+@media (hover: hover) {
+  .auth-link:hover {
+    color: var(--color-accent-hi);
+  }
+}
+
+@media (max-width: 56rem) {
+  body {
+    padding: var(--space-lg) var(--gutter);
+    place-items: center;
+  }
+
+  .auth-shell,
+  .auth-shell--wide {
+    margin-inline: auto;
+  }
+
+  .auth-glass {
+    padding: var(--space-lg);
+  }
+
+  .field-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
