@@ -38,6 +38,7 @@ Route::middleware('auth')->group(function () {
     // Riwayat Peminjaman & Invoice PDF Member
     Route::get('/riwayat', [BorrowingHistoryController::class, 'index'])->name('member.history');
     Route::get('/riwayat/{id}/invoice', [BorrowingHistoryController::class, 'invoice'])->name('member.history.invoice');
+    Route::post('/riwayat/{id}/extend', [BorrowingHistoryController::class, 'extend'])->name('member.history.extend');
 
     Route::get('/profil', [MemberProfileController::class, 'show'])->name('member.profile');
     Route::put('/profil', [MemberProfileController::class, 'update'])->name('member.profile.update');

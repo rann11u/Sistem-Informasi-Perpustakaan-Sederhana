@@ -439,9 +439,28 @@
                             </div>
                         </div>
 
-                        {{-- Footer: Tombol Download Bukti --}}
+                        {{-- Footer: Tombol Download Bukti & Perpanjangan --}}
                         @if(in_array($borrowing->status, ['booked', 'borrowed', 'returned']))
-                            <div class="txn-footer">
+                            <div class="txn-footer" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                @if($borrowing->status === 'borrowed')
+                                    @if(!$borrowing->is_extended && !$isOverdue)
+                                        <form action="{{ route('member.history.extend', $borrowing->id) }}" method="POST" style="margin:0;" onsubmit="return confirm('Perpanjang masa pinjam selama 3 hari? (Hanya dapat dilakukan 1 kali)')">
+                                            @csrf
+                                            <button type="submit" style="background:#0284c7; color:white; border:none; padding:8px 14px; border-radius:6px; font-size:13px; font-weight:bold; cursor:pointer;">
+                                                Perpanjang Pinjaman (+3 Hari)
+                                            </button>
+                                        </form>
+                                    @elseif($borrowing->is_extended)
+                                        <span style="background:#e0f2fe; color:#0369a1; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:bold;">
+                                            Sudah Diperpanjang (+3 Hari)
+                                        </span>
+                                    @elseif($isOverdue)
+                                        <span style="background:#fde8e7; color:#a12222; padding:6px 12px; border-radius:6px; font-size:12px; font-weight:bold;">
+                                            Terlambat (Tidak Bisa Perpanjang)
+                                        </span>
+                                    @endif
+                                @endif
+
                                 <a href="{{ route('member.history.invoice', $borrowing->id) }}"
                                    target="_blank" class="btn-invoice">
                                     <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 2l5 5h-5V4zm-5 14v-2h8v2H8zm0-4v-2h8v2H8zm0-4V8h3v2H8z"/></svg>

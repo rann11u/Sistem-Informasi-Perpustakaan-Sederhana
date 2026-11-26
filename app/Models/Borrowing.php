@@ -16,6 +16,7 @@ class Borrowing extends Model
         'pickup_deadline',
         'return_date',
         'status',
+        'is_extended',
     ];
 
     protected function casts(): array
@@ -25,6 +26,7 @@ class Borrowing extends Model
             'due_date'        => 'date',
             'pickup_deadline' => 'datetime',
             'return_date'     => 'date',
+            'is_extended'     => 'boolean',
         ];
     }
 
