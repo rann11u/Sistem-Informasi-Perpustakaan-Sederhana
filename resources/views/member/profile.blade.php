@@ -46,9 +46,38 @@
             transition: color 0.2s;
         }
 
-        .nav-link:hover, .nav-link.active {
-            color: white;
-            font-weight: bold;
+        /* Tombol Profil dengan Foto / Kosong jika belum ada */
+        .btn-profile-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid #e5f1eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            background-color: #265a48;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-profile-avatar:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 3px rgba(229, 241, 235, 0.4);
+        }
+
+        .btn-profile-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .btn-profile-avatar .empty-avatar {
+            width: 18px;
+            height: 18px;
+            fill: #dcebe3;
         }
 
         .badge-code {
@@ -249,7 +278,18 @@
         <h1>Sistem Informasi Perpustakaan</h1>
         <div class="user-nav">
             <a href="{{ route('member.books') }}" class="nav-link">Katalog Buku</a>
-            <a href="{{ route('member.profile') }}" class="nav-link active">Profil Saya</a>
+            
+            {{-- Tombol Profil: Menampilkan foto yang di-up, kosong jika belum ada --}}
+            <a href="{{ route('member.profile') }}" class="btn-profile-avatar" title="Profil Saya">
+                @if($member && $member->photo)
+                    <img src="{{ asset('storage/' . $member->photo) }}" alt="Foto Profil">
+                @else
+                    <svg class="empty-avatar" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                @endif
+            </a>
+
             <span>Halo, <strong>{{ $user->name }}</strong></span>
             @if($member && $member->member_code)
                 <span class="badge-code">{{ $member->member_code }}</span>
