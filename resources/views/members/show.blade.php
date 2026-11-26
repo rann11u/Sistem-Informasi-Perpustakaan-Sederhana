@@ -32,7 +32,6 @@
                 <tr><th style="{{ $thStyle }}">Kode Anggota</th><td style="{{ $tdStyle }}"><strong>{{ $member->member_code }}</strong></td></tr>
                 <tr><th style="{{ $thStyle }}">Nama Lengkap</th><td style="{{ $tdStyle }}">{{ $member->name }}</td></tr>
                 <tr><th style="{{ $thStyle }}">Email</th><td style="{{ $tdStyle }}">{{ $member->email ?? '-' }}</td></tr>
-                <tr><th style="{{ $thStyle }}">No. Telepon</th><td style="{{ $tdStyle }}">{{ $member->phone ?? '-' }}</td></tr>
                 <tr><th style="{{ $thStyle }}">Alamat</th><td style="{{ $tdStyle }}">{{ $member->address ?? '-' }}</td></tr>
                 <tr><th style="{{ $thStyle }}">Tanggal Bergabung</th><td style="{{ $tdStyle }}">{{ $member->joined_at ? $member->joined_at->format('d F Y') : '-' }}</td></tr>
             </table>

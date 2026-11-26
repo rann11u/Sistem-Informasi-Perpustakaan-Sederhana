@@ -51,12 +51,6 @@
         </div>
 
         <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Telepon</label>
-            <input type="text" name="phone" value="{{ old('phone', $member->phone) }}" 
-                   style="width:100%; padding:9px 12px; border:1px solid #ccc; border-radius:6px; font-size:14px;">
-        </div>
-
-        <div style="margin-bottom:14px;">
             <label style="display:block; margin-bottom:4px; font-weight:bold;">Alamat</label>
             <textarea id="address" name="address" rows="3" 
                       style="width:100%; padding:9px 12px; border:1px solid #ccc; border-radius:6px; font-size:14px; transition:border-color 0.2s;">{{ old('address', $member->address) }}</textarea>

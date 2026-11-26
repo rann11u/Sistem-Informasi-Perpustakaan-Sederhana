@@ -16,7 +16,6 @@
                 <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Kode</th>
                 <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Nama</th>
                 <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Email</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Telepon</th>
                 <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Bergabung</th>
                 <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Aksi</th>
             </tr>
@@ -37,7 +36,6 @@
                     <td style="padding:10px; vertical-align:middle;">{{ $member->member_code }}</td>
                     <td style="padding:10px; vertical-align:middle;"><strong>{{ $member->name }}</strong></td>
                     <td style="padding:10px; vertical-align:middle;">{{ $member->email ?? '-' }}</td>
-                    <td style="padding:10px; vertical-align:middle;">{{ $member->phone ?? '-' }}</td>
                     <td style="padding:10px; vertical-align:middle;">{{ $member->joined_at ? $member->joined_at->format('d/m/Y') : '-' }}</td>
                     <td style="padding:10px; vertical-align:middle;">
                         <a href="{{ route('members.show', $member->id) }}" style="color:#1565c0; margin-right:8px; text-decoration:none; font-weight:600;">Detail</a>
@@ -50,7 +48,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="8" style="padding:20px; text-align:center; color:#888;">Belum ada anggota.</td></tr>
+                <tr><td colspan="7" style="padding:20px; text-align:center; color:#888;">Belum ada anggota.</td></tr>
             @endforelse
         </tbody>
     </table>
