@@ -60,6 +60,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('members', MemberController::class);
         
         // Peminjaman & Aksi Konfirmasi Booking Petugas
+        Route::post('/borrowings/cancel-expired', [BorrowingController::class, 'cancelAllExpired'])->name('borrowings.cancel-expired');
         Route::post('/borrowings/{borrowing}/confirm-pickup', [BorrowingController::class, 'confirmPickup'])->name('borrowings.confirm-pickup');
         Route::post('/borrowings/{borrowing}/cancel-booking', [BorrowingController::class, 'cancelBooking'])->name('borrowings.cancel-booking');
         Route::get('/borrowings/{borrowing}/invoice', [BorrowingController::class, 'invoice'])->name('borrowings.invoice');
