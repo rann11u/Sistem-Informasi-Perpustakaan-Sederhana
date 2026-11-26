@@ -31,13 +31,12 @@
                     <td style="padding:10px;">{{ $loop->iteration }}</td>
                     <td style="padding:10px;">{{ $category->name }}</td>
                     <td style="padding:10px;">{{ $category->description ?? '-' }}</td>
-
                     {{-- Tombol Edit dan Hapus HANYA untuk Admin --}}
                     @if (Auth::user()->role === 'admin')
                         <td style="padding:10px;">
                             <a href="{{ route('categories.edit', $category->id) }}" style="color:#f9a825; margin-right:8px; text-decoration:none; font-weight:bold;">Edit</a>
                             <form action="{{ route('categories.destroy', $category->id) }}" method="POST" style="display:inline;"
-                                  onsubmit="return confirm('Hapus kategori ini?')">
+                                  onsubmit="openDeleteModal(event, 'Kategori {{ addslashes($category->name) }}')">
                                 @csrf @method('DELETE')
                                 <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0; font-weight:bold;">Hapus</button>
                             </form>

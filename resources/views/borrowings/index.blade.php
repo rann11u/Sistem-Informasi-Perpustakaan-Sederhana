@@ -128,6 +128,7 @@
                                 <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0;">Hapus</button>
                             </form>
                         @endif
+
                     </td>
                 </tr>
             @empty
