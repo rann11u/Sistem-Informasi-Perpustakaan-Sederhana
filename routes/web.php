@@ -27,6 +27,9 @@ Route::middleware('auth')->group(function () {
 
     // Buku, Anggota, dan Peminjaman: Full CRUD untuk Admin & Petugas
     Route::resource('books', BookController::class);
+
+    // Cek duplikasi data anggota (AJAX real-time)
+    Route::get('/members/check-duplicate', [MemberController::class, 'checkDuplicate'])->name('members.check-duplicate');
     Route::resource('members', MemberController::class);
     Route::resource('borrowings', BorrowingController::class);
 
