@@ -34,8 +34,23 @@ class MemberBookController extends Controller
             $query->where('category_id', $request->category_id);
         }
 
-        // Tampilkan dengan pagination 12 buku per halaman
-        $books = $query->latest()->paginate(12)->withQueryString();
+        // Filter hanya buku yang tersedia (stok > 0)
+        if ($request->boolean('in_stock')) {
+            $query->where('stock', '>', 0);
+        }
+
+        // Pengurutan hasil
+        $sort = $request->get('sort', 'latest');
+        if ($sort === 'title_asc') {
+            $query->orderBy('title', 'asc');
+        } elseif ($sort === 'stock_desc') {
+            $query->orderBy('stock', 'desc');
+        } else {
+            $query->latest();
+        }
+
+        // Tampilkan dengan pagination 15 buku per halaman (pas dengan grid 5 kolom)
+        $books = $query->paginate(15)->withQueryString();
 
         // Hitung kuota buku aktif member (maksimal 5 buku)
         $member = auth()->user()->member;

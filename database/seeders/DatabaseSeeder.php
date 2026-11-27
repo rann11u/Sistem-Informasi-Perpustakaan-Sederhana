@@ -16,13 +16,33 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // Admin User
+        // 1. Akun Admin
         User::firstOrCreate(
             ['email' => 'admin@perpustakaan.com'],
             [
-                'name' => 'Admin',
-                'password' => Hash::make('admin123'),
-                'role' => 'admin',
+                'name'     => 'Administrator',
+                'password' => Hash::make('password123'),
+                'role'     => 'admin',
+            ]
+        );
+
+        // 2. Akun Petugas
+        User::firstOrCreate(
+            ['email' => 'petugas@perpustakaan.com'],
+            [
+                'name'     => 'Petugas Perpustakaan',
+                'password' => Hash::make('password123'),
+                'role'     => 'petugas',
+            ]
+        );
+
+        // 3. Akun Admin new
+        User::firstOrCreate(
+            ['email' => 'adminNew@perpustakaan.com'],
+            [
+                'name'     => 'Admin New Perpustakaan',
+                'password' => Hash::make('password123'),
+                'role'     => 'admin',
             ]
         );
     }
