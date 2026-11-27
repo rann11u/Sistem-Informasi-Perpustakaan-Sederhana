@@ -3,41 +3,48 @@
 @section('title', 'Edit Pengguna')
 
 @section('content')
-    <h2 style="margin-top:0;">Edit Pengguna</h2>
-
-    <form action="{{ route('users.update', $user->id) }}" method="POST" style="max-width:480px;">
-        @csrf @method('PUT')
-
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Nama <span style="color:red">*</span></label>
-            <input type="text" name="name" value="{{ old('name', $user->name) }}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
+    <div class="admin-card" style="max-width: 560px; margin: 0 auto;">
+        <div class="page-header-action">
+            <h2>Edit Data Pengguna</h2>
+            <a href="{{ route('users.index') }}" class="btn-ui btn-ui-secondary">← Kembali</a>
         </div>
 
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Email <span style="color:red">*</span></label>
-            <input type="email" name="email" value="{{ old('email', $user->email) }}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
-        </div>
+        <form action="{{ route('users.update', $user->id) }}" method="POST">
+            @csrf @method('PUT')
 
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Role <span style="color:red">*</span></label>
-            <select name="role" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
-                <option value="petugas" {{ old('role', $user->role) === 'petugas' ? 'selected' : '' }}>Petugas</option>
-                <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
-            </select>
-        </div>
+            <div class="form-field">
+                <label>Nama Pengguna <span style="color:var(--color-error)">*</span></label>
+                <input type="text" name="name" value="{{ old('name', $user->name) }}" required>
+            </div>
 
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Password Baru <small style="color:#888;">(kosongkan jika tidak diubah)</small></label>
-            <input type="password" name="password" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;">
-        </div>
+            <div class="form-field">
+                <label>Alamat Email <span style="color:var(--color-error)">*</span></label>
+                <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
+            </div>
 
-        <div style="margin-bottom:20px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Konfirmasi Password Baru</label>
-            <input type="password" name="password_confirmation" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;">
-        </div>
+            <div class="form-field">
+                <label>Peran / Role <span style="color:var(--color-error)">*</span></label>
+                <select name="role" required>
+                    <option value="petugas" {{ old('role', $user->role) === 'petugas' ? 'selected' : '' }}>Petugas</option>
+                    <option value="admin" {{ old('role', $user->role) === 'admin' ? 'selected' : '' }}>Admin</option>
+                </select>
+            </div>
 
-        <button type="submit" style="background:#174a38; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Perbarui</button>
-        <a href="{{ route('users.index') }}" style="margin-left:12px; color:#555;">Batal</a>
-    </form>
+            <div class="form-field">
+                <label>Kata Sandi Baru</label>
+                <input type="password" name="password" placeholder="Kosongkan jika tidak ingin mengubah kata sandi">
+                <small>*Biarkan kosong jika tidak ada perubahan password.</small>
+            </div>
+
+            <div class="form-field">
+                <label>Konfirmasi Kata Sandi Baru</label>
+                <input type="password" name="password_confirmation" placeholder="Ulangi kata sandi baru">
+            </div>
+
+            <div style="display:flex; align-items:center; gap:12px; margin-top:24px;">
+                <button type="submit" class="btn-ui btn-ui-primary">Perbarui Pengguna</button>
+                <a href="{{ route('users.index') }}" class="btn-ui btn-ui-secondary">Batal</a>
+            </div>
+        </form>
+    </div>
 @endsection
-

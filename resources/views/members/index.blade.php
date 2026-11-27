@@ -3,53 +3,65 @@
 @section('title', 'Daftar Anggota')
 
 @section('content')
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-        <h2 style="margin:0;">Daftar Anggota</h2>
-        <a href="{{ route('members.create') }}" style="background:#174a38; color:white; padding:8px 16px; border-radius:6px; text-decoration:none;">+ Tambah Anggota</a>
-    </div>
+    <div class="admin-card">
+        <div class="page-header-action">
+            <div>
+                <h2>Daftar Anggota</h2>
+                <small style="color:var(--color-muted);">Data seluruh member perpustakaan terdaftar</small>
+            </div>
+            <a href="{{ route('members.create') }}" class="btn-ui btn-ui-primary">+ Tambah Anggota</a>
+        </div>
 
-    <table style="width:100%; border-collapse:collapse; font-size:14px;">
-        <thead>
-            <tr style="background:#f0f0f0;">
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">#</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Foto</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Kode</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Nama</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Email</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Bergabung</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($members as $member)
-                <tr style="border-bottom:1px solid #eee;">
-                    <td style="padding:10px; vertical-align:middle;">{{ $loop->iteration }}</td>
-                    <td style="padding:10px; vertical-align:middle;">
-                        @if ($member->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($member->photo))
-                            <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}" style="width:40px; height:40px; border-radius:50%; object-fit:cover; border:1px solid #dce3df; display:block;">
-                        @else
-                            <div style="width:40px; height:40px; border-radius:50%; background:#e2e8f0; color:#475569; display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:14px;">
-                                {{ strtoupper(substr($member->name, 0, 1)) }}
-                            </div>
-                        @endif
-                    </td>
-                    <td style="padding:10px; vertical-align:middle;">{{ $member->member_code }}</td>
-                    <td style="padding:10px; vertical-align:middle;"><strong>{{ $member->name }}</strong></td>
-                    <td style="padding:10px; vertical-align:middle;">{{ $member->email ?? '-' }}</td>
-                    <td style="padding:10px; vertical-align:middle;">{{ $member->joined_at ? $member->joined_at->format('d/m/Y') : '-' }}</td>
-                    <td style="padding:10px; vertical-align:middle;">
-                        <a href="{{ route('members.show', $member->id) }}" style="color:#1565c0; margin-right:8px; text-decoration:none; font-weight:600;">Detail</a>
-                        <a href="{{ route('members.edit', $member->id) }}" style="color:#f9a825; margin-right:8px; text-decoration:none;">Edit</a>
-                        <form action="{{ route('members.destroy', $member->id) }}" method="POST" style="display:inline;"
-                              onsubmit="openDeleteModal(event, 'Anggota {{ addslashes($member->name) }}')">
-                            @csrf @method('DELETE')
-                            <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0;">Hapus</button>
-                        </form>
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="7" style="padding:20px; text-align:center; color:#888;">Belum ada anggota.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
+        <div class="admin-table-responsive">
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">#</th>
+                        <th style="width:55px;">Foto</th>
+                        <th>Kode</th>
+                        <th>Nama</th>
+                        <th>Email</th>
+                        <th>Bergabung</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse ($members as $member)
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+                            <td>
+                                @if ($member->photo && \Illuminate\Support\Facades\Storage::disk('public')->exists($member->photo))
+                                    <img src="{{ asset('storage/' . $member->photo) }}" alt="{{ $member->name }}" 
+                                         style="width:38px; height:38px; border-radius:50%; object-fit:cover; border:1px solid var(--card-border); display:block;">
+                                @else
+                                    <div style="width:38px; height:38px; border-radius:50%; background:var(--table-head-bg); color:var(--color-ink); display:flex; align-items:center; justify-content:center; font-weight:bold; font-size:13px;">
+                                        {{ strtoupper(substr($member->name, 0, 1)) }}
+                                    </div>
+                                @endif
+                            </td>
+                            <td style="color:var(--color-muted); font-size:13px;">{{ $member->member_code }}</td>
+                            <td><strong>{{ $member->name }}</strong></td>
+                            <td style="color:var(--color-muted);">{{ $member->email ?? '-' }}</td>
+                            <td style="color:var(--color-muted);">{{ $member->joined_at ? $member->joined_at->format('d/m/Y') : '-' }}</td>
+                            <td>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <a href="{{ route('members.show', $member->id) }}" class="btn-ui btn-ui-secondary btn-ui-sm">Detail</a>
+                                    <a href="{{ route('members.edit', $member->id) }}" class="btn-ui btn-ui-secondary btn-ui-sm">Edit</a>
+                                    <form action="{{ route('members.destroy', $member->id) }}" method="POST" style="display:inline;"
+                                          onsubmit="openDeleteModal(event, 'Anggota {{ addslashes($member->name) }}')">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="btn-ui btn-ui-danger btn-ui-sm">Hapus</button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="7" style="padding:28px; text-align:center; color:var(--color-muted);">Belum ada anggota.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 @endsection

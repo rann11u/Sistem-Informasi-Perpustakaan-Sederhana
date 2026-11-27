@@ -3,23 +3,29 @@
 @section('title', 'Tambah Kategori')
 
 @section('content')
-    <h2 style="margin-top:0;">Tambah Kategori</h2>
-
-    <form action="{{ route('categories.store') }}" method="POST" style="max-width:480px;">
-        @csrf
-
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Nama <span style="color:red">*</span></label>
-            <input type="text" name="name" value="{{ old('name') }}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
+    <div class="admin-card" style="max-width: 580px; margin: 0 auto;">
+        <div class="page-header-action">
+            <h2>Tambah Kategori Baru</h2>
+            <a href="{{ route('categories.index') }}" class="btn-ui btn-ui-secondary">← Kembali</a>
         </div>
 
-        <div style="margin-bottom:20px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Deskripsi</label>
-            <textarea name="description" rows="4" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;">{{ old('description') }}</textarea>
-        </div>
+        <form action="{{ route('categories.store') }}" method="POST">
+            @csrf
 
-        <button type="submit" style="background:#174a38; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Simpan</button>
-        <a href="{{ route('categories.index') }}" style="margin-left:12px; color:#555;">Batal</a>
-    </form>
+            <div class="form-field">
+                <label>Nama Kategori <span style="color:var(--color-error)">*</span></label>
+                <input type="text" name="name" value="{{ old('name') }}" placeholder="Contoh: Pemrograman, Fiksi, Sains" required>
+            </div>
+
+            <div class="form-field">
+                <label>Deskripsi Kategori</label>
+                <textarea name="description" rows="4" placeholder="Deskripsi atau cakupan kategori buku...">{{ old('description') }}</textarea>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:12px; margin-top:24px;">
+                <button type="submit" class="btn-ui btn-ui-primary">Simpan Kategori</button>
+                <a href="{{ route('categories.index') }}" class="btn-ui btn-ui-secondary">Batal</a>
+            </div>
+        </form>
+    </div>
 @endsection
-

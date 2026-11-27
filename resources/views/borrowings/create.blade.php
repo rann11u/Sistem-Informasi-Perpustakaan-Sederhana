@@ -3,57 +3,62 @@
 @section('title', 'Catat Peminjaman')
 
 @section('content')
-    <h2 style="margin-top:0;">Catat Peminjaman Baru</h2>
-
-    <form action="{{ route('borrowings.store') }}" method="POST" style="max-width:520px;">
-        @csrf
-
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Anggota <span style="color:red">*</span></label>
-            <select name="member_id" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
-                <option value="">-- Pilih Anggota --</option>
-                @foreach ($members as $member)
-                    <option value="{{ $member->id }}" {{ old('member_id') == $member->id ? 'selected' : '' }}>
-                        {{ $member->member_code }} — {{ $member->name }}
-                    </option>
-                @endforeach
-            </select>
+    <div class="admin-card" style="max-width: 600px; margin: 0 auto;">
+        <div class="page-header-action">
+            <h2>Catat Peminjaman Baru</h2>
+            <a href="{{ route('borrowings.index') }}" class="btn-ui btn-ui-secondary">← Kembali</a>
         </div>
 
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Buku <span style="color:red">*</span></label>
-            <select name="book_id" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
-                <option value="">-- Pilih Buku --</option>
-                @foreach ($books as $book)
-                    <option value="{{ $book->id }}" {{ old('book_id') == $book->id ? 'selected' : '' }}>
-                        {{ $book->title }} (Stok: {{ $book->stock }})
-                    </option>
-                @endforeach
-            </select>
-        </div>
+        <form action="{{ route('borrowings.store') }}" method="POST">
+            @csrf
 
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Jumlah <span style="color:red">*</span></label>
-            <input type="number" name="quantity" value="{{ old('quantity', 1) }}" min="1" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
-        </div>
+            <div class="form-field">
+                <label>Pilih Anggota <span style="color:var(--color-error)">*</span></label>
+                <select name="member_id" required>
+                    <option value="">-- Pilih Anggota --</option>
+                    @foreach ($members as $member)
+                        <option value="{{ $member->id }}" {{ old('member_id') == $member->id ? 'selected' : '' }}>
+                            {{ $member->member_code }} — {{ $member->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        <div style="margin-bottom:14px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Tanggal Pinjam <span style="color:red">*</span></label>
-            <input type="date" id="borrow_date" name="borrow_date" value="{{ old('borrow_date', date('Y-m-d')) }}" style="width:100%; padding:8px; border:1px solid #ccc; border-radius:6px;" required>
-        </div>
+            <div class="form-field">
+                <label>Pilih Buku <span style="color:var(--color-error)">*</span></label>
+                <select name="book_id" required>
+                    <option value="">-- Pilih Buku --</option>
+                    @foreach ($books as $book)
+                        <option value="{{ $book->id }}" {{ old('book_id') == $book->id ? 'selected' : '' }}>
+                            {{ $book->title }} (Stok Tersedia: {{ $book->stock }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
 
-        {{-- JATUH TEMPO OTOMATIS (READONLY) --}}
-        <div style="margin-bottom:20px;">
-            <label style="display:block; margin-bottom:4px; font-weight:bold;">Jatuh Tempo (Otomatis 1 Minggu)</label>
-            <input type="date" id="due_date" name="due_date" value="{{ old('due_date', date('Y-m-d', strtotime('+7 days'))) }}" style="width:100%; padding:8px; border:1px solid #ddd; background:#f4f6f9; border-radius:6px; color:#555;" readonly>
-            <small style="color:#666; font-size:12px;">*Jatuh tempo otomatis dihitung 1 minggu (7 hari) dari tanggal pinjam.</small>
-        </div>
+            <div class="form-field">
+                <label>Jumlah Eksemplar <span style="color:var(--color-error)">*</span></label>
+                <input type="number" name="quantity" value="{{ old('quantity', 1) }}" min="1" required>
+            </div>
 
-        <button type="submit" style="background:#174a38; color:white; padding:10px 20px; border:none; border-radius:6px; cursor:pointer;">Simpan</button>
-        <a href="{{ route('borrowings.index') }}" style="margin-left:12px; color:#555; text-decoration:none;">Batal</a>
-    </form>
+            <div class="form-field">
+                <label>Tanggal Pinjam <span style="color:var(--color-error)">*</span></label>
+                <input type="date" id="borrow_date" name="borrow_date" value="{{ old('borrow_date', date('Y-m-d')) }}" required>
+            </div>
 
-    {{-- Script untuk update otomatis jatuh tempo jika tanggal pinjam diubah --}}
+            <div class="form-field">
+                <label>Jatuh Tempo (Otomatis 1 Minggu)</label>
+                <input type="date" id="due_date" name="due_date" value="{{ old('due_date', date('Y-m-d', strtotime('+7 days'))) }}" style="opacity:0.8; cursor:not-allowed;" readonly>
+                <small>*Jatuh tempo otomatis dihitung 7 hari ke depan dari tanggal pinjam.</small>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:12px; margin-top:24px;">
+                <button type="submit" class="btn-ui btn-ui-primary">Simpan Transaksi</button>
+                <a href="{{ route('borrowings.index') }}" class="btn-ui btn-ui-secondary">Batal</a>
+            </div>
+        </form>
+    </div>
+
     <script>
         document.getElementById('borrow_date').addEventListener('change', function() {
             if (this.value) {
