@@ -53,17 +53,33 @@ class BorrowingController extends Controller
             'quantity'    => 'required|integer|min:1',
         ]);
 
-        // Validasi kuota maksimal 5 buku per member
-        $activeCount = Borrowing::where('member_id', $request->member_id)
-            ->whereIn('status', ['borrowed', 'booked'])
+        // Validasi kuota maksimal 5 buku per member (Online + Offline)
+        $borrowedCount = Borrowing::where('member_id', $request->member_id)
+            ->where('status', 'borrowed')
             ->with('details')
             ->get()
-            ->sum(function ($b) {
-                return $b->details->sum('quantity');
-            });
+            ->sum(fn ($b) => $b->details->sum('quantity'));
+
+        $bookedCount = Borrowing::where('member_id', $request->member_id)
+            ->where('status', 'booked')
+            ->with('details')
+            ->get()
+            ->sum(fn ($b) => $b->details->sum('quantity'));
+
+        $activeCount    = $borrowedCount + $bookedCount;
+        $remainingQuota = max(0, 5 - $activeCount);
 
         if (($activeCount + $request->quantity) > 5) {
-            return back()->with('error', "Gagal! Member ini sudah memiliki {$activeCount} buku aktif (dipinjam/booking). Batas maksimal adalah 5 buku.")->withInput();
+            $details = [];
+            if ($borrowedCount > 0) {
+                $details[] = "{$borrowedCount} buku sedang dipinjam";
+            }
+            if ($bookedCount > 0) {
+                $details[] = "{$bookedCount} buku sudah di-booking online";
+            }
+            $detailText = count($details) > 0 ? ' (' . implode(', ', $details) . ')' : '';
+
+            return back()->with('error', "Gagal! Kuota tersisa hanya {$remainingQuota} buku{$detailText}.")->withInput();
         }
 
         // Cek stok buku
