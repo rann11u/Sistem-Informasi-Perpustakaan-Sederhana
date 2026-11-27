@@ -98,7 +98,7 @@
                                             @endif
                                         </div>
                                     </div>
-                                    <div class="book-qty">{{ $detail->quantity }} eks</div>
+                                    <div class="book-qty">{{ $detail->quantity }} buku</div>
                                 </div>
                             @endforeach
                         </div>
