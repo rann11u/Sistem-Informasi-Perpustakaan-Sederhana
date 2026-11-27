@@ -102,6 +102,9 @@
                 Proses Pengembalian
             </a>
         @endif
+        <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" style="background:#6d28d9; color:white; padding:9px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">
+            Cetak / Download Bukti Pinjam (PDF)
+        </a>
         <a href="{{ route('borrowings.index') }}" style="color:#4b5563; text-decoration:none; padding:9px 14px; background:#e5e7eb; border-radius:6px; font-weight:bold;">
             ← Kembali ke Daftar
         </a>

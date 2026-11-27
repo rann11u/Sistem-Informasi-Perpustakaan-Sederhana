@@ -27,7 +27,13 @@ class BorrowingController extends Controller
         $countBorrowed = Borrowing::where('status', 'borrowed')->count();
         $countReturned = Borrowing::where('status', 'returned')->count();
 
-        return view('borrowings.index', compact('borrowings', 'countBooked', 'countBorrowed', 'countReturned'));
+        // Hitung berapa booking yang telah kedaluwarsa (lewat batas 1x24 jam)
+        $countExpired  = Borrowing::where('status', 'booked')
+            ->whereNotNull('pickup_deadline')
+            ->where('pickup_deadline', '<', now())
+            ->count();
+
+        return view('borrowings.index', compact('borrowings', 'countBooked', 'countBorrowed', 'countReturned', 'countExpired'));
     }
 
     // Tampilkan form tambah peminjaman langsung (offline)
@@ -125,15 +131,34 @@ class BorrowingController extends Controller
             return back()->with('error', 'Hanya transaksi berstatus booking yang dapat dibatalkan.');
         }
 
+        $isExpired = $borrowing->isExpired();
+
         // Kembalikan stok setiap buku yang dibooking
         foreach ($borrowing->details as $detail) {
-            $detail->book->increment('stock', $detail->quantity);
+            if ($detail->book) {
+                $detail->book->increment('stock', $detail->quantity);
+            }
         }
 
         $borrowing->status = 'cancelled';
         $borrowing->save();
 
+        if ($isExpired) {
+            return back()->with('success', 'Booking berhasil dibatalkan karena telah melewati batas waktu 1x24 jam (kedaluwarsa). Stok buku telah otomatis dikembalikan ke katalog.');
+        }
+
         return back()->with('success', 'Booking berhasil dibatalkan dan stok buku telah dikembalikan.');
+    }
+
+    // Batalkan Seluruh Booking yang Kedaluwarsa (> 1 Hari) Sekaligus
+    public function cancelAllExpired() {
+        $count = Borrowing::cancelExpiredBookings();
+
+        if ($count > 0) {
+            return back()->with('success', "Berhasil membatalkan {$count} booking yang kedaluwarsa (> 1 hari). Seluruh stok buku telah dikembalikan ke katalog.");
+        }
+
+        return back()->with('info', 'Tidak ada booking yang kedaluwarsa saat ini.');
     }
 
     // Tampilkan form pengembalian buku
@@ -171,5 +196,14 @@ class BorrowingController extends Controller
         $borrowing->delete();
 
         return redirect()->route('borrowings.index')->with('success', 'Data peminjaman berhasil dihapus.');
+    }
+
+    // Cetak / Download Bukti Pinjam (Invoice PDF) untuk Petugas & Admin
+    public function invoice($id) {
+        $borrowing = Borrowing::with(['details.book.category', 'member', 'user'])->findOrFail($id);
+        $member    = $borrowing->member;
+        $user      = $borrowing->user ?? auth()->user();
+
+        return view('member.invoice', compact('borrowing', 'member', 'user'));
     }
 }
