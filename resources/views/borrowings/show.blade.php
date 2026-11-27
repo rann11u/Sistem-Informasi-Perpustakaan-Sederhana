@@ -108,5 +108,30 @@
 
             <a href="{{ route('borrowings.index') }}" class="btn-ui btn-ui-secondary">Kembali</a>
         </div>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        @if ($borrowing->status === 'booked')
+            <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" onsubmit="return confirm('Konfirmasi penyerahan buku kepada member?')">
+                @csrf
+                <button type="submit" style="background:#16a34a; color:white; border:none; padding:9px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                    Serahkan Buku (Konfirmasi Pengambilan)
+                </button>
+            </form>
+            <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" onsubmit="return confirm('Batalkan booking ini?')">
+                @csrf
+                <button type="submit" style="background:#dc2626; color:white; border:none; padding:9px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">
+                    Batalkan Booking
+                </button>
+            </form>
+        @elseif ($borrowing->status === 'borrowed')
+            <a href="{{ route('borrowings.edit', $borrowing->id) }}" style="background:#174a38; color:white; padding:9px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">
+                Proses Pengembalian
+            </a>
+        @endif
+        <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" style="background:#6d28d9; color:white; padding:9px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">
+            Cetak / Download Bukti Pinjam (PDF)
+        </a>
+        <a href="{{ route('borrowings.index') }}" style="color:#4b5563; text-decoration:none; padding:9px 14px; background:#e5e7eb; border-radius:6px; font-weight:bold;">
+            ← Kembali ke Daftar
+        </a>
     </div>
 @endsection
