@@ -1,8 +1,8 @@
-<!-- Modal Konfirmasi Hapus Kustom (Tengah Layar & Modern) -->
+<!-- Modal Konfirmasi Kustom (Tengah Layar & Modern) -->
 <div id="deleteModal" class="custom-modal-overlay" style="display: none;" onclick="handleModalBackdrop(event)">
     <div class="custom-modal-box">
-        <div class="modal-icon-wrapper">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <div class="modal-icon-wrapper" id="confirmModalIconWrapper">
+            <svg id="confirmModalIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M3 6h18"></path>
                 <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
                 <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
@@ -10,7 +10,7 @@
                 <line x1="14" y1="11" x2="14" y2="17"></line>
             </svg>
         </div>
-        <h3 class="modal-title">Konfirmasi Hapus</h3>
+        <h3 class="modal-title" id="confirmModalTitle">Konfirmasi Hapus</h3>
         <p id="deleteModalMessage" class="modal-message">Apakah Anda yakin ingin menghapus data ini?</p>
         <div class="modal-actions">
             <button type="button" class="btn-modal-cancel" onclick="closeDeleteModal()">Batal</button>
@@ -67,6 +67,16 @@
         margin: 0 auto 16px;
     }
 
+    .modal-icon-wrapper.variant-warning {
+        background-color: #fef3c7;
+        border-color: #fffbeb;
+    }
+
+    .modal-icon-wrapper.variant-success {
+        background-color: #dcfce7;
+        border-color: #f0fdf4;
+    }
+
     .modal-title {
         margin: 0 0 8px;
         font-size: 18px;
@@ -120,31 +130,100 @@
     .btn-modal-confirm:hover {
         background-color: #b91c1c;
     }
+
+    .btn-modal-confirm.variant-warning {
+        background-color: #d97706;
+    }
+
+    .btn-modal-confirm.variant-warning:hover {
+        background-color: #b45309;
+    }
+
+    .btn-modal-confirm.variant-success {
+        background-color: #16a34a;
+    }
+
+    .btn-modal-confirm.variant-success:hover {
+        background-color: #15803d;
+    }
+
+    .btn-modal-confirm:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
 </style>
 
 <script>
     let activeDeleteForm = null;
+    let activeConfirmText = 'Ya, Hapus';
+    let activeLoadingText = 'Menghapus...';
 
-    function openDeleteModal(event, itemName) {
+    const MODAL_ICONS = {
+        delete: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>',
+        danger: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>',
+        warning: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>',
+        success: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+    };
+
+    function openConfirmModal(event, options) {
         if (event) {
             event.preventDefault();
             activeDeleteForm = event.target.tagName === 'FORM' ? event.target : event.target.closest('form');
         }
-        
+
+        const opts = options || {};
+        const variant = opts.variant || 'danger';
+        const iconType = opts.icon || variant;
+        const title = opts.title || 'Konfirmasi Tindakan';
+        const messageHtml = opts.messageHtml || escapeHtml(opts.message || 'Apakah Anda yakin ingin melanjutkan tindakan ini?');
+        const note = opts.note || '';
+        activeConfirmText = opts.confirmText || 'Ya, Lanjutkan';
+        activeLoadingText = opts.loadingText || 'Memproses...';
+
+        const iconWrapper = document.getElementById('confirmModalIconWrapper');
+        iconWrapper.className = 'modal-icon-wrapper' + (variant !== 'danger' ? ' variant-' + variant : '');
+        iconWrapper.innerHTML = MODAL_ICONS[iconType] || MODAL_ICONS.danger;
+
+        document.getElementById('confirmModalTitle').textContent = title;
+
         const messageEl = document.getElementById('deleteModalMessage');
-        if (itemName) {
-            messageEl.innerHTML = 'Apakah Anda yakin ingin menghapus <strong>' + escapeHtml(itemName) + '</strong>?<br><span style="font-size: 12px; color: #6b7280; display: inline-block; margin-top: 4px;">Data yang dihapus tidak dapat dikembalikan.</span>';
-        } else {
-            messageEl.innerHTML = 'Apakah Anda yakin ingin menghapus data ini?<br><span style="font-size: 12px; color: #6b7280; display: inline-block; margin-top: 4px;">Data yang dihapus tidak dapat dikembalikan.</span>';
-        }
+        messageEl.innerHTML = messageHtml + (note
+            ? '<br><span style="font-size: 12px; color: #6b7280; display: inline-block; margin-top: 6px;">' + escapeHtml(note) + '</span>'
+            : '');
+
+        const btn = document.getElementById('confirmDeleteBtn');
+        btn.className = 'btn-modal-confirm' + (variant !== 'danger' ? ' variant-' + variant : '');
+        btn.disabled = false;
+        btn.textContent = activeConfirmText;
 
         const modal = document.getElementById('deleteModal');
         modal.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
+    function openDeleteModal(event, itemName) {
+        const messageHtml = itemName
+            ? 'Apakah Anda yakin ingin menghapus <strong>' + escapeHtml(itemName) + '</strong>?'
+            : 'Apakah Anda yakin ingin menghapus data ini?';
+
+        openConfirmModal(event, {
+            title: 'Konfirmasi Hapus',
+            messageHtml: messageHtml,
+            note: 'Data yang dihapus tidak dapat dikembalikan.',
+            confirmText: 'Ya, Hapus',
+            loadingText: 'Menghapus...',
+            variant: 'danger',
+            icon: 'delete'
+        });
+    }
+
     function closeDeleteModal() {
         const modal = document.getElementById('deleteModal');
+        const btn = document.getElementById('confirmDeleteBtn');
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = activeConfirmText;
+        }
         modal.style.display = 'none';
         document.body.style.overflow = '';
         activeDeleteForm = null;
@@ -158,6 +237,11 @@
 
     function submitDeleteForm() {
         if (activeDeleteForm) {
+            const btn = document.getElementById('confirmDeleteBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = activeLoadingText;
+            }
             activeDeleteForm.submit();
         }
     }

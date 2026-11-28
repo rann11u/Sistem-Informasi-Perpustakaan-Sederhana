@@ -18,7 +18,7 @@
                 Semua Data
             </a>
             <a href="{{ route('borrowings.index', ['status' => 'booked']) }}" class="tab-filter-item {{ request('status') === 'booked' ? 'active' : '' }}">
-                Booking Online ({{ $countBooked }})
+                Daftar Booking Masuk ({{ $countBooked }})
             </a>
             <a href="{{ route('borrowings.index', ['status' => 'borrowed']) }}" class="tab-filter-item {{ request('status') === 'borrowed' ? 'active' : '' }}">
                 Sedang Dipinjam ({{ $countBorrowed }})
@@ -27,100 +27,27 @@
                 Sudah Selesai ({{ $countReturned }})
             </a>
         </div>
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
-        <h2 style="margin:0;">Daftar Peminjaman & Booking Buku</h2>
-        <a href="{{ route('borrowings.create') }}" style="background:#174a38; color:white; padding:8px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">+ Catat Peminjaman Langsung</a>
-    </div>
 
-    {{-- Tab Filter Status Peminjaman --}}
-    <div style="display:flex; gap:8px; margin-bottom:18px; flex-wrap:wrap; border-bottom:1px solid #e5e7eb; padding-bottom:12px;">
-        <a href="{{ route('borrowings.index') }}" style="padding:6px 14px; border-radius:20px; font-size:13px; text-decoration:none; {{ !request('status') ? 'background:#174a38; color:white; font-weight:bold;' : 'background:#f3f4f6; color:#4b5563;' }}">
-            Semua Data
-        </a>
-        <a href="{{ route('borrowings.index', ['status' => 'booked']) }}" style="padding:6px 14px; border-radius:20px; font-size:13px; text-decoration:none; {{ request('status') === 'booked' ? 'background:#d97706; color:white; font-weight:bold;' : 'background:#fef3c7; color:#92400e;' }}">
-            Daftar Booking Masuk ({{ $countBooked }})
-        </a>
-        <a href="{{ route('borrowings.index', ['status' => 'borrowed']) }}" style="padding:6px 14px; border-radius:20px; font-size:13px; text-decoration:none; {{ request('status') === 'borrowed' ? 'background:#1565c0; color:white; font-weight:bold;' : 'background:#e0f2fe; color:#0369a1;' }}">
-            Sedang Dipinjam ({{ $countBorrowed }})
-        </a>
-        <a href="{{ route('borrowings.index', ['status' => 'returned']) }}" style="padding:6px 14px; border-radius:20px; font-size:13px; text-decoration:none; {{ request('status') === 'returned' ? 'background:#16a34a; color:white; font-weight:bold;' : 'background:#dcfce7; color:#15803d;' }}">
-            Sudah Selesai ({{ $countReturned }})
-        </a>
-    </div>
-
-    {{-- Banner Peringatan Booking Kedaluwarsa --}}
-    @if(isset($countExpired) && $countExpired > 0)
-        <div style="background:#fef2f2; border:1px solid #fecaca; border-left:5px solid #dc2626; padding:12px 18px; border-radius:8px; margin-bottom:18px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-            <div>
-                <strong style="color:#991b1b; font-size:14px; display:flex; align-items:center; gap:6px;">
-                    ⚠️ Terdapat {{ $countExpired }} booking online yang telah kedaluwarsa (lewat batas 1x24 jam)!
-                </strong>
-                <div style="color:#7f1d1d; font-size:13px; margin-top:3px;">
-                    Member tidak datang mengambil buku tepat waktu. Anda dapat membatalkan booking agar stok buku kembali tersedia untuk dipinjam.
+        {{-- Banner Peringatan Booking Kedaluwarsa (> 1 Hari) --}}
+        @if(isset($countExpired) && $countExpired > 0)
+            <div class="expired-alert-banner">
+                <div>
+                    <div class="expired-alert-title">
+                        <span>⚠️ Terdapat {{ $countExpired }} booking online yang telah kedaluwarsa (lewat batas 1x24 jam)!</span>
+                    </div>
+                    <div class="expired-alert-sub">
+                        Member tidak datang mengambil buku tepat waktu. Anda dapat membatalkan booking agar stok buku kembali tersedia untuk dipinjam.
+                    </div>
                 </div>
+                <form action="{{ route('borrowings.cancel-expired') }}" method="POST"
+                      onsubmit="openConfirmModal(event, { title: 'Batalkan Semua Booking Kedaluwarsa', message: 'Apakah Anda yakin ingin membatalkan semua ({{ $countExpired }}) booking online yang telah kedaluwarsa?', note: 'Stok seluruh buku akan otomatis dikembalikan ke katalog perpustakaan.', confirmText: 'Ya, Batalkan Semua', loadingText: 'Membatalkan...', variant: 'danger' })">
+                    @csrf
+                    <button type="submit" class="btn-ui btn-ui-danger btn-ui-sm">
+                        Batalkan Semua Booking Kedaluwarsa
+                    </button>
+                </form>
             </div>
-            <form action="{{ route('borrowings.cancel-expired') }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan SEMUA ({{ $countExpired }}) booking yang kedaluwarsa?\n\nStok seluruh buku akan otomatis dikembalikan ke katalog perpustakaan.')">
-                @csrf
-                <button type="submit" style="background:#dc2626; color:white; border:none; padding:8px 16px; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer; box-shadow:0 1px 2px rgba(220,38,38,0.2);">
-                    ⚡ Batalkan Semua Booking Kedaluwarsa
-                </button>
-            </form>
-        </div>
-    @endif
-
-    <table style="width:100%; border-collapse:collapse; font-size:14px;">
-        <thead>
-            <tr style="background:#f0f0f0;">
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">#</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Anggota</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Buku yang Dipinjam</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Tgl Pinjam / Batas Ambil</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Jatuh Tempo</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Status</th>
-                <th style="padding:10px; text-align:left; border-bottom:2px solid #ddd;">Aksi</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($borrowings as $borrowing)
-                @php
-                    $isBooked  = $borrowing->status === 'booked';
-                    $isExpired = $isBooked && $borrowing->isExpired();
-                @endphp
-                <tr style="border-bottom:1px solid #eee; {{ $isExpired ? 'background:#fff8f8;' : '' }}">
-                    <td style="padding:10px;">{{ $loop->iteration }}</td>
-                    
-                    {{-- Nama & Kode Anggota --}}
-                    <td style="padding:10px;">
-                        <strong>{{ $borrowing->member->name ?? '-' }}</strong><br>
-                        <small style="color:#6b7280;">{{ $borrowing->member->member_code ?? '' }}</small>
-                    </td>
-
-                    {{-- Judul Buku --}}
-                    <td style="padding:10px;">
-                        @foreach($borrowing->details as $detail)
-                            <div>• {{ $detail->book->title ?? '-' }} ({{ $detail->quantity }} eks)</div>
-                        @endforeach
-                    </td>
-
-                    {{-- Tanggal / Batas Ambil --}}
-                    <td style="padding:10px;">
-                        @if($isBooked)
-                            <div style="font-weight:bold; font-size:13px; {{ $isExpired ? 'color:#dc2626;' : 'color:#b45309;' }}">
-                                Batas: {{ $borrowing->pickup_deadline ? $borrowing->pickup_deadline->format('d/m/Y H:i') : '-' }} WIB
-                            </div>
-                            @if($isExpired)
-                                <span style="background:#fee2e2; color:#dc2626; padding:2px 8px; border-radius:10px; font-size:11px; font-weight:bold; display:inline-block; margin-top:3px;">
-                                    ⚠️ Lewat 1 Hari (Kedaluwarsa)
-                                </span>
-                            @else
-                                <span style="background:#ecfdf5; color:#047857; padding:2px 8px; border-radius:10px; font-size:11px; display:inline-block; margin-top:3px;">
-                                    Sisa: {{ now()->diffForHumans($borrowing->pickup_deadline, ['parts' => 2, 'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE]) }}
-                                </span>
-                            @endif
-                        @else
-                            {{ $borrowing->borrow_date ? $borrowing->borrow_date->format('d/m/Y') : '-' }}
-                        @endif
-                    </td>
+        @endif
 
         <div class="admin-table-responsive">
             <table class="admin-table">
@@ -129,7 +56,7 @@
                         <th style="width:40px;">#</th>
                         <th>Anggota</th>
                         <th>Buku yang Dipinjam</th>
-                        <th>Tgl Pinjam / Batas</th>
+                        <th>Tgl Pinjam / Batas Ambil</th>
                         <th>Jatuh Tempo</th>
                         <th>Status</th>
                         <th>Aksi</th>
@@ -137,7 +64,12 @@
                 </thead>
                 <tbody>
                     @forelse ($borrowings as $borrowing)
-                        <tr>
+                        @php
+                            $isBooked  = $borrowing->status === 'booked';
+                            $isExpired = $isBooked && $borrowing->isExpired();
+                            $isOverdue = $borrowing->status === 'borrowed' && $borrowing->due_date && $borrowing->due_date->isPast();
+                        @endphp
+                        <tr class="{{ $isExpired ? 'row-expired' : '' }}">
                             <td>{{ $loop->iteration }}</td>
                             <td>
                                 <strong>{{ $borrowing->member->name ?? '-' }}</strong><br>
@@ -145,28 +77,46 @@
                             </td>
                             <td>
                                 @foreach($borrowing->details as $detail)
-                                    <div style="font-size:13px; margin-bottom:2px;">{{ $detail->book->title ?? '-' }} <span style="color:var(--color-muted);">({{ $detail->quantity }} buku)</span></div>
+                                    <div style="font-size:13px; margin-bottom:2px;">
+                                        {{ $detail->book->title ?? '-' }}
+                                        <span style="color:var(--color-muted);">({{ $detail->quantity }} eks)</span>
+                                    </div>
                                 @endforeach
                             </td>
                             <td>
-                                @if($borrowing->status === 'booked')
-                                    <span style="color:var(--badge-booked-color); font-weight:600; font-size:13px;">
-                                        Batas: {{ $borrowing->pickup_deadline ? $borrowing->pickup_deadline->format('d/m/Y H:i') : '-' }}
-                                    </span>
+                                @if($isBooked)
+                                    <div style="font-weight:600; font-size:13px; color:{{ $isExpired ? 'var(--color-error)' : 'var(--badge-booked-color)' }};">
+                                        Batas: {{ $borrowing->pickup_deadline ? $borrowing->pickup_deadline->format('d/m/Y H:i') : '-' }} WIB
+                                    </div>
+                                    @if($isExpired)
+                                        <span class="mini-pill mini-pill-danger">⚠️ Lewat 1 Hari (Kedaluwarsa)</span>
+                                    @elseif($borrowing->pickup_deadline)
+                                        <span class="mini-pill mini-pill-success">
+                                            Sisa: {{ now()->diffForHumans($borrowing->pickup_deadline, ['parts' => 2, 'syntax' => \Carbon\CarbonInterface::DIFF_ABSOLUTE]) }}
+                                        </span>
+                                    @endif
                                 @else
                                     <span style="color:var(--color-muted);">{{ $borrowing->borrow_date ? $borrowing->borrow_date->format('d/m/Y') : '-' }}</span>
                                 @endif
                             </td>
                             <td>
-                                @if($borrowing->status === 'booked')
+                                @if($isBooked)
                                     <span style="color:var(--color-muted); font-style:italic; font-size:12px;">Dihitung saat diambil</span>
                                 @else
-                                    <span style="color:var(--color-muted);">{{ $borrowing->due_date ? $borrowing->due_date->format('d/m/Y') : '-' }}</span>
+                                    <span style="color:{{ $isOverdue ? 'var(--color-error)' : 'var(--color-muted)' }}; font-weight:{{ $isOverdue ? '600' : '400' }};">
+                                        {{ $borrowing->due_date ? $borrowing->due_date->format('d/m/Y') : '-' }}
+                                    </span>
+                                    @if($isOverdue)
+                                        <div><span class="mini-pill mini-pill-danger">Terlambat</span></div>
+                                    @endif
                                 @endif
                             </td>
                             <td>
                                 @if ($borrowing->status === 'booked')
                                     <span class="status-pill pill-booked">Booking Online</span>
+                                    @if($isExpired)
+                                        <div><span class="mini-pill mini-pill-danger">Kedaluwarsa</span></div>
+                                    @endif
                                 @elseif ($borrowing->status === 'borrowed')
                                     <span class="status-pill pill-borrowed">Dipinjam</span>
                                 @elseif ($borrowing->status === 'returned')
@@ -178,42 +128,33 @@
                             <td>
                                 <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
                                     <a href="{{ route('borrowings.show', $borrowing->id) }}" class="btn-ui btn-ui-secondary btn-ui-sm">Detail</a>
+                                    <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" class="btn-ui btn-ui-secondary btn-ui-sm">Invoice PDF</a>
 
                                     @if ($borrowing->status === 'booked')
-                                        <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Konfirmasi bahwa member telah datang dan buku telah diserahkan?')">
-                                            @csrf
-                                            <button type="submit" class="btn-ui btn-ui-success btn-ui-sm">Serahkan</button>
-                                        </form>
-                                        <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Batalkan booking ini dan kembalikan stok buku?')">
-                                            @csrf
-                                            <button type="submit" class="btn-ui btn-ui-danger btn-ui-sm">Batal</button>
-                                        </form>
+                                        @if ($isExpired)
+                                            <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;"
+                                                  onsubmit="openConfirmModal(event, { title: 'Batalkan Booking Kedaluwarsa', message: 'Booking ini telah melewati batas waktu pengambilan 1x24 jam.', note: 'Batalkan booking sekarang dan kembalikan stok buku ke katalog?', confirmText: 'Ya, Batalkan', loadingText: 'Membatalkan...', variant: 'danger' })">
+                                                @csrf
+                                                <button type="submit" class="btn-ui btn-ui-danger btn-ui-sm">Batalkan / Kedaluwarsa</button>
+                                            </form>
+                                            <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;"
+                                                  onsubmit="openConfirmModal(event, { title: 'Konfirmasi Penyerahan Buku', message: 'Booking ini sudah melewati batas waktu 1x24 jam.', note: 'Apakah Anda tetap ingin menyerahkan buku kepada member?', confirmText: 'Ya, Tetap Serahkan', loadingText: 'Memproses...', variant: 'warning' })">
+                                                @csrf
+                                                <button type="submit" class="btn-ui btn-ui-secondary btn-ui-sm">Tetap Serahkan</button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;"
+                                                  onsubmit="openConfirmModal(event, { title: 'Konfirmasi Pengambilan Buku', message: 'Konfirmasi bahwa member telah datang dan buku telah diserahkan?', note: 'Status transaksi akan berubah menjadi Dipinjam.', confirmText: 'Ya, Serahkan', loadingText: 'Memproses...', variant: 'success' })">
+                                                @csrf
+                                                <button type="submit" class="btn-ui btn-ui-success btn-ui-sm">Serahkan</button>
+                                            </form>
+                                            <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;"
+                                                  onsubmit="openConfirmModal(event, { title: 'Batalkan Booking Online', message: 'Apakah Anda yakin ingin membatalkan booking online ini?', note: 'Stok buku yang dibooking akan dikembalikan ke katalog.', confirmText: 'Ya, Batalkan', loadingText: 'Membatalkan...', variant: 'danger' })">
+                                                @csrf
+                                                <button type="submit" class="btn-ui btn-ui-danger btn-ui-sm">Batal</button>
+                                            </form>
+                                        @endif
                                     @endif
-                    {{-- Status --}}
-                    <td style="padding:10px;">
-                        @if ($borrowing->status === 'booked')
-                            <span style="background:#fef3c7; color:#92400e; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold; display:inline-block;">
-                                Booking Online
-                            </span>
-                            @if($isExpired)
-                                <span style="background:#fee2e2; color:#b91c1c; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:bold; display:block; margin-top:4px; text-align:center;">
-                                    Kedaluwarsa
-                                </span>
-                            @endif
-                        @elseif ($borrowing->status === 'borrowed')
-                            <span style="background:#e0f2fe; color:#0369a1; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">
-                                Dipinjam
-                            </span>
-                        @elseif ($borrowing->status === 'returned')
-                            <span style="background:#dcfce7; color:#15803d; padding:4px 10px; border-radius:12px; font-size:12px; font-weight:bold;">
-                                Dikembalikan
-                            </span>
-                        @elseif ($borrowing->status === 'cancelled')
-                            <span style="background:#f3f4f6; color:#6b7280; padding:4px 10px; border-radius:12px; font-size:12px;">
-                                Dibatalkan
-                            </span>
-                        @endif
-                    </td>
 
                                     @if ($borrowing->status === 'borrowed')
                                         <a href="{{ route('borrowings.edit', $borrowing->id) }}" class="btn-ui btn-ui-primary btn-ui-sm">Kembalikan</a>
@@ -238,65 +179,4 @@
             </table>
         </div>
     </div>
-                        {{-- Tombol Aksi untuk Status BOOKED --}}
-                        @if ($borrowing->status === 'booked')
-                            @if ($isExpired)
-                                {{-- Jika Sudah Kedaluwarsa (> 1 Hari): Tombol Batalkan / Kedaluwarsa Lebih Menonjol --}}
-                                <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;"
-                                      onsubmit="return confirm('Booking ini telah KEDALUWARSA (melewati 1x24 jam).\n\nBatalkan booking sekarang dan kembalikan stok buku ke katalog?')">
-                                    @csrf
-                                    <button type="submit" style="background:#dc2626; color:white; border:none; padding:5px 11px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer; margin-right:6px; box-shadow:0 1px 2px rgba(220,38,38,0.2);">
-                                        ⚠️ Batalkan / Kedaluwarsa
-                                    </button>
-                                </form>
-                                <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;"
-                                      onsubmit="return confirm('Peringatan: Booking ini sebenarnya sudah lewat batas 1x24 jam.\n\nApakah Anda tetap ingin menyerahkan buku kepada member?')">
-                                    @csrf
-                                    <button type="submit" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:5px 9px; border-radius:4px; font-size:11px; cursor:pointer; margin-right:6px;">
-                                        Tetap Serahkan
-                                    </button>
-                                </form>
-                            @else
-                                {{-- Masih Berlaku (Dalam Batas 1x24 Jam) --}}
-                                <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;"
-                                      onsubmit="return confirm('Konfirmasi bahwa member telah datang dan buku telah diserahkan?')">
-                                    @csrf
-                                    <button type="submit" style="background:#16a34a; color:white; border:none; padding:5px 10px; border-radius:4px; font-size:12px; font-weight:bold; cursor:pointer; margin-right:6px;">
-                                        Konfirmasi Pengambilan / Serahkan Buku
-                                    </button>
-                                </form>
-                                <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;"
-                                      onsubmit="return confirm('Batalkan booking ini dan kembalikan stok buku?')">
-                                    @csrf
-                                    <button type="submit" style="color:#dc2626; background:none; border:none; cursor:pointer; font-size:12px; padding:0; text-decoration:underline;">
-                                        Batalkan
-                                    </button>
-                                </form>
-                            @endif
-                        @endif
-
-                        {{-- Tombol Proses Pengembalian Jika Status BORROWED --}}
-                        @if ($borrowing->status === 'borrowed')
-                            <a href="{{ route('borrowings.edit', $borrowing->id) }}" style="color:#174a38; margin-right:8px; text-decoration:none; font-weight:bold;">Kembalikan</a>
-                        @endif
-
-                        {{-- Tombol Cetak / Download Invoice PDF --}}
-                        <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" style="color:#6d28d9; margin-right:8px; text-decoration:none; font-weight:bold;">Invoice PDF</a>
-
-                        {{-- Tombol Hapus Jika Status Selesai / Dibatalkan --}}
-                        @if (in_array($borrowing->status, ['returned', 'cancelled']))
-                            <form action="{{ route('borrowings.destroy', $borrowing->id) }}" method="POST" style="display:inline;"
-                                  onsubmit="openDeleteModal(event, 'data transaksi ini')">
-                                @csrf @method('DELETE')
-                                <button type="submit" style="color:#c62828; background:none; border:none; cursor:pointer; padding:0;">Hapus</button>
-                            </form>
-                        @endif
-
-                    </td>
-                </tr>
-            @empty
-                <tr><td colspan="7" style="padding:24px; text-align:center; color:#888;">Belum ada data transaksi peminjaman atau booking.</td></tr>
-            @endforelse
-        </tbody>
-    </table>
 @endsection
