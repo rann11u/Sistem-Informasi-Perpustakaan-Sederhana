@@ -57,8 +57,11 @@ Route::middleware('auth')->group(function () {
     Route::middleware('role:admin,petugas')->group(function () {
         Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
         Route::resource('books', BookController::class);
+
+        // Cek duplikasi data anggota (AJAX real-time) - wajib sebelum resource members
+        Route::get('/members/check-duplicate', [MemberController::class, 'checkDuplicate'])->name('members.check-duplicate');
         Route::resource('members', MemberController::class);
-        
+
         // Peminjaman & Aksi Konfirmasi Booking Petugas
         Route::post('/borrowings/cancel-expired', [BorrowingController::class, 'cancelAllExpired'])->name('borrowings.cancel-expired');
         Route::post('/borrowings/{borrowing}/confirm-pickup', [BorrowingController::class, 'confirmPickup'])->name('borrowings.confirm-pickup');
@@ -66,20 +69,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/borrowings/{borrowing}/invoice', [BorrowingController::class, 'invoice'])->name('borrowings.invoice');
         Route::resource('borrowings', BorrowingController::class);
 
+        // Kategori: Petugas & Admin sama-sama bisa melihat daftar kategori
         Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     });
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // Buku, Anggota, dan Peminjaman: Full CRUD untuk Admin & Petugas
-    Route::resource('books', BookController::class);
-
-    // Cek duplikasi data anggota (AJAX real-time)
-    Route::get('/members/check-duplicate', [MemberController::class, 'checkDuplicate'])->name('members.check-duplicate');
-    Route::resource('members', MemberController::class);
-    Route::resource('borrowings', BorrowingController::class);
-
-    // Kategori: Petugas & Admin sama-sama BISA MELIHAT di rute ini
-    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
 
     // ==========================================
     // 4. KHUSUS ADMIN SAJA

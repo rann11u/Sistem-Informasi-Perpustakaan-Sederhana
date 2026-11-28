@@ -61,6 +61,11 @@ class CategoryController extends Controller
     // Delete - Hapus kategori
     public function destroy($id) {
         $category = Category::findOrFail($id);
+
+        if ($category->books()->exists()) {
+            return back()->with('error', 'Kategori tidak dapat dihapus karena masih digunakan oleh data buku.');
+        }
+
         $category->delete();
 
         return redirect()->route('categories.index')->with('success', 'Kategori berhasil dihapus.');
