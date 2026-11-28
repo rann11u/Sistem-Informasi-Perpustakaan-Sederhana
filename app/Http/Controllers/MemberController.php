@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Book;
+use App\Models\Borrowing;
 use App\Models\Member;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class MemberController extends Controller
@@ -47,11 +51,19 @@ class MemberController extends Controller
         ]);
     }
 
-    // Detail - Tampilkan detail satu anggota
+    // Detail - Tampilkan detail satu anggota beserta buku yang sedang dipinjam/dibooking
     public function show($id) {
         $member = Member::findOrFail($id);
 
-        return view('members.show', compact('member'));
+        $activeBorrowings = $member->borrowings()
+            ->with('details.book.category')
+            ->whereIn('status', ['borrowed', 'booked'])
+            ->latest()
+            ->get();
+
+        $totalActiveBooks = $activeBorrowings->sum(fn ($b) => $b->details->sum('quantity'));
+
+        return view('members.show', compact('member', 'activeBorrowings', 'totalActiveBooks'));
     }
 
     // Tampilkan form tambah
@@ -128,17 +140,47 @@ class MemberController extends Controller
         return redirect()->route('members.index')->with('success', 'Data anggota berhasil diperbarui.');
     }
 
-    // Delete - Hapus anggota
+    // Delete - Hapus anggota beserta sinkronisasi stok buku yang masih dipinjam/dibooking
     public function destroy($id) {
-        $member = Member::findOrFail($id);
+        $member = Member::with(['borrowings.details', 'user'])->findOrFail($id);
+        $photoPath = $member->photo;
 
-        // Hapus foto jika ada
-        if ($member->photo && Storage::disk('public')->exists($member->photo)) {
-            Storage::disk('public')->delete($member->photo);
+        DB::transaction(function () use ($member) {
+            foreach ($member->borrowings as $borrowing) {
+                // Kembalikan stok buku hanya jika transaksi masih aktif (booked / borrowed)
+                if (in_array($borrowing->status, ['booked', 'borrowed'])) {
+                    foreach ($borrowing->details as $detail) {
+                        if ($detail->book_id) {
+                            Book::where('id', $detail->book_id)
+                                ->lockForUpdate()
+                                ->increment('stock', $detail->quantity);
+                        }
+                    }
+                }
+
+                $borrowing->delete();
+            }
+
+            // Catat akun login member (jika masih terhubung) sebelum menghapus profil member
+            $linkedUser = $member->user;
+            if (! $linkedUser && $member->email) {
+                $linkedUser = User::where('email', $member->email)
+                    ->where('role', 'member')
+                    ->first();
+            }
+
+            $member->delete();
+
+            if ($linkedUser && $linkedUser->role === 'member' && ! Borrowing::where('user_id', $linkedUser->id)->exists()) {
+                $linkedUser->delete();
+            }
+        });
+
+        // Hapus file foto setelah transaksi database berhasil
+        if ($photoPath && Storage::disk('public')->exists($photoPath)) {
+            Storage::disk('public')->delete($photoPath);
         }
 
-        $member->delete();
-
-        return redirect()->route('members.index')->with('success', 'Anggota berhasil dihapus.');
+        return redirect()->route('members.index')->with('success', 'Anggota berhasil dihapus dan stok buku yang sedang dipinjam/dibooking telah dikembalikan.');
     }
 }

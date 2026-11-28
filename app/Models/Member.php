@@ -14,7 +14,6 @@ class Member extends Model
         'name',
         'email',
         'phone',
-        'photo',
         'address',
         'photo',
         'joined_at',
