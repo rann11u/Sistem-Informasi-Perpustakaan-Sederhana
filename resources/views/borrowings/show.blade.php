@@ -58,7 +58,7 @@
                     <th>Jatuh Tempo</th>
                     <td>
                         {{ $borrowing->due_date ? $borrowing->due_date->format('d/m/Y') : '-' }}
-                        @if ($borrowing->status === 'borrowed' && $borrowing->due_date->isPast())
+                        @if ($borrowing->status === 'borrowed' && $borrowing->due_date && $borrowing->due_date->isPast())
                             <span style="color:var(--color-error); font-weight:bold; margin-left:8px;">(Terlambat)</span>
                         @endif
                     </td>
@@ -90,13 +90,15 @@
         </table>
 
         {{-- Aksi Cepat Petugas --}}
-        <div style="margin-top:24px; display:flex; gap:10px; align-items:center;">
+        <div style="margin-top:24px; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
             @if ($borrowing->status === 'booked')
-                <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Konfirmasi bahwa member telah datang dan buku telah diserahkan?')">
+                <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" style="display:inline;"
+                      onsubmit="openConfirmModal(event, { title: 'Konfirmasi Pengambilan Buku', message: 'Konfirmasi bahwa member telah datang dan buku telah diserahkan?', note: 'Status transaksi akan berubah menjadi Dipinjam.', confirmText: 'Ya, Serahkan', loadingText: 'Memproses...', variant: 'success' })">
                     @csrf
                     <button type="submit" class="btn-ui btn-ui-success">Serahkan Buku ke Member</button>
                 </form>
-                <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Batalkan booking ini dan kembalikan stok buku?')">
+                <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" style="display:inline;"
+                      onsubmit="openConfirmModal(event, { title: 'Batalkan Booking Online', message: 'Apakah Anda yakin ingin membatalkan booking online ini?', note: 'Stok buku yang dibooking akan dikembalikan ke katalog.', confirmText: 'Ya, Batalkan', loadingText: 'Membatalkan...', variant: 'danger' })">
                     @csrf
                     <button type="submit" class="btn-ui btn-ui-danger">Batalkan Booking</button>
                 </form>
@@ -106,32 +108,11 @@
                 <a href="{{ route('borrowings.edit', $borrowing->id) }}" class="btn-ui btn-ui-primary">Proses Pengembalian</a>
             @endif
 
+            <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" class="btn-ui btn-ui-secondary">
+                Cetak / Download Bukti Pinjam (PDF)
+            </a>
+
             <a href="{{ route('borrowings.index') }}" class="btn-ui btn-ui-secondary">Kembali</a>
         </div>
-    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-        @if ($borrowing->status === 'booked')
-            <form action="{{ route('borrowings.confirm-pickup', $borrowing->id) }}" method="POST" onsubmit="return confirm('Konfirmasi penyerahan buku kepada member?')">
-                @csrf
-                <button type="submit" style="background:#16a34a; color:white; border:none; padding:9px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">
-                    Serahkan Buku (Konfirmasi Pengambilan)
-                </button>
-            </form>
-            <form action="{{ route('borrowings.cancel-booking', $borrowing->id) }}" method="POST" onsubmit="return confirm('Batalkan booking ini?')">
-                @csrf
-                <button type="submit" style="background:#dc2626; color:white; border:none; padding:9px 16px; border-radius:6px; font-weight:bold; cursor:pointer;">
-                    Batalkan Booking
-                </button>
-            </form>
-        @elseif ($borrowing->status === 'borrowed')
-            <a href="{{ route('borrowings.edit', $borrowing->id) }}" style="background:#174a38; color:white; padding:9px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">
-                Proses Pengembalian
-            </a>
-        @endif
-        <a href="{{ route('borrowings.invoice', $borrowing->id) }}" target="_blank" style="background:#6d28d9; color:white; padding:9px 16px; border-radius:6px; text-decoration:none; font-weight:bold;">
-            Cetak / Download Bukti Pinjam (PDF)
-        </a>
-        <a href="{{ route('borrowings.index') }}" style="color:#4b5563; text-decoration:none; padding:9px 14px; background:#e5e7eb; border-radius:6px; font-weight:bold;">
-            ← Kembali ke Daftar
-        </a>
     </div>
 @endsection
