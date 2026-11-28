@@ -51,16 +51,6 @@
 
         <span class="nav-section-title">Operasional</span>
 
-        <a href="{{ route('members.index') }}" class="nav-item {{ request()->routeIs('members.*') ? 'active' : '' }}">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            Anggota
-        </a>
-
         <a href="{{ route('borrowings.index') }}" class="nav-item {{ request()->routeIs('borrowings.*') ? 'active' : '' }}">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
@@ -69,25 +59,10 @@
             Peminjaman
         </a>
 
-<nav class="navigation" aria-label="Navigasi utama" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <a href="{{ route('dashboard') }}" {{ request()->routeIs('dashboard') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Dashboard</a>
-        <a href="{{ route('books.index') }}" {{ request()->routeIs('books.*') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Buku</a>
-        <a href="{{ route('categories.index') }}" {{ request()->routeIs('categories.*') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Kategori</a>
-        <a href="{{ route('members.index') }}" {{ request()->routeIs('members.*') ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Anggota</a>
-        <a href="{{ route('borrowings.index') }}" {{ request()->routeIs('borrowings.*') && request('status') !== 'booked' ? 'style=background:#e5f1eb;font-weight:bold;' : '' }}>Peminjaman</a>
-        @php $pendingBookings = \App\Models\Borrowing::where('status', 'booked')->count(); @endphp
-        <a href="{{ route('borrowings.index', ['status' => 'booked']) }}" {{ request()->routeIs('borrowings.*') && request('status') === 'booked' ? 'style=background:#fef3c7;color:#92400e;font-weight:bold;' : '' }}>
-            Daftar Booking Masuk
-            @if($pendingBookings > 0)
-                <span style="background:#d97706; color:white; padding:1px 6px; border-radius:10px; font-size:11px; margin-left:4px;">{{ $pendingBookings }}</span>
-            @endif
-        </a>
+        <span class="nav-section-title">Sistem</span>
 
         {{-- HANYA ADMIN YANG DAPAT MELIHAT MENU KELOLA PENGGUNA --}}
         @if (Auth::check() && Auth::user()->role === 'admin')
-            <span class="nav-section-title">Sistem</span>
-
             <a href="{{ route('users.index') }}" class="nav-item {{ request()->routeIs('users.*') ? 'active' : '' }}">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
@@ -97,6 +72,16 @@
                 Kelola Pengguna
             </a>
         @endif
+
+        <a href="{{ route('members.index') }}" class="nav-item {{ request()->routeIs('members.*') ? 'active' : '' }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <circle cx="9" cy="7" r="4"/>
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+            </svg>
+            Kelola Member
+        </a>
     </nav>
 
     {{-- Sidebar Footer: User profile & Logout --}}
