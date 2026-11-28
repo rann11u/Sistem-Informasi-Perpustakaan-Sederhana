@@ -4,20 +4,7 @@
 
 @section('content')
     {{-- ========================================================
-         1. AKSES CEPAT (SHORTCUT)
-         ======================================================== --}}
-    <div class="dashboard-quick-bar">
-        <div class="quick-shortcuts">
-            <span class="quick-title">Akses Cepat:</span>
-            <a href="{{ route('books.create') }}" class="btn-quick">+ Tambah Buku</a>
-            <a href="{{ route('members.create') }}" class="btn-quick">+ Tambah Anggota</a>
-            <a href="{{ route('borrowings.create') }}" class="btn-quick">+ Catat Peminjaman</a>
-            <a href="{{ route('borrowings.index', ['status' => 'borrowed']) }}" class="btn-quick btn-quick-highlight">Catat Pengembalian</a>
-        </div>
-    </div>
-
-    {{-- ========================================================
-         2. RINGKASAN STATISTIK (5 KARTU: KARTU DENDA DIHAPUS)
+         1. RINGKASAN STATISTIK (5 KARTU: KARTU DENDA DIHAPUS)
          ======================================================== --}}
     <div class="stat-grid-5">
         {{-- Total Koleksi Buku --}}

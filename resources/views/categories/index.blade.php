@@ -18,8 +18,6 @@
                     <tr>
                         <th style="width:40px;">#</th>
                         <th>Nama Kategori</th>
-                        <th>Deskripsi</th>
-                        <th>Jumlah Buku</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -28,8 +26,6 @@
                         <tr>
                             <td>{{ $loop->iteration }}</td>
                             <td><strong>{{ $category->name }}</strong></td>
-                            <td style="color:var(--color-muted);">{{ $category->description ?? '-' }}</td>
-                            <td>{{ $category->books_count ?? $category->books->count() }}</td>
                             <td>
                                 <div style="display:flex; align-items:center; gap:8px;">
                                     <a href="{{ route('categories.edit', $category->id) }}" class="btn-ui btn-ui-secondary btn-ui-sm">Edit</a>
@@ -43,7 +39,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" style="padding:28px; text-align:center; color:var(--color-muted);">Belum ada kategori.</td>
+                            <td colspan="3" style="padding:28px; text-align:center; color:var(--color-muted);">Belum ada kategori.</td>
                         </tr>
                     @endforelse
                 </tbody>
