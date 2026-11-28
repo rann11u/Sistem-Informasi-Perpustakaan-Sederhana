@@ -7,6 +7,7 @@ use App\Models\Book;
 use App\Models\Category;
 use App\Models\Borrowing;
 use App\Models\BorrowingDetail;
+use Illuminate\Support\Facades\DB;
 
 class MemberBookController extends Controller
 {
@@ -80,59 +81,63 @@ class MemberBookController extends Controller
             return back()->with('error', 'Profil anggota Anda belum lengkap.');
         }
 
-        // 1. Validasi Maksimal 5 Buku (Buku yang sedang dipinjam + sedang dibooking)
-        $activeCount = Borrowing::where('member_id', $member->id)
-            ->whereIn('status', ['borrowed', 'booked'])
-            ->with('details')
-            ->get()
-            ->sum(function ($b) {
-                return $b->details->sum('quantity');
-            });
-
-        if ($activeCount >= 5) {
-            return back()->with('error', 'Gagal booking! Anda sudah mencapai batas maksimal 5 buku (sedang dipinjam / dibooking). Silakan kembalikan buku terlebih dahulu.');
-        }
-
-        // 2. Cek apakah member sudah membooking buku yang sama sebelumnya
-        $alreadyBooked = Borrowing::where('member_id', $member->id)
-            ->where('status', 'booked')
-            ->whereHas('details', function ($q) use ($bookId) {
-                $q->where('book_id', $bookId);
-            })->exists();
-
-        if ($alreadyBooked) {
-            return back()->with('error', 'Anda sudah membooking buku ini sebelumnya dan masih menunggu pengambilan.');
-        }
-
-        // 3. Cek ketersediaan stok buku
-        $book = Book::findOrFail($bookId);
-        if ($book->stock < 1) {
-            return back()->with('error', 'Maaf, stok buku ini sedang habis.');
-        }
-
-        // 4. Hitung batas waktu pengambilan 1 hari (24 jam)
+        // 1-4. Proses booking dalam transaksi database agar kuota & stok selalu sinkron
         $pickupDeadline = now()->addHours(24);
         $borrowDate     = now()->toDateString();
         $dueDate        = now()->addDays(7)->toDateString();
 
-        $borrowing = Borrowing::create([
-            'user_id'         => null, // Diisi nanti oleh petugas saat buku diambil
-            'member_id'       => $member->id,
-            'borrow_date'     => $borrowDate,
-            'due_date'        => $dueDate,
-            'pickup_deadline' => $pickupDeadline,
-            'status'          => 'booked',
-        ]);
+        $result = DB::transaction(function () use ($member, $bookId, $pickupDeadline, $borrowDate, $dueDate) {
+            $activeCount = Borrowing::where('member_id', $member->id)
+                ->whereIn('status', ['borrowed', 'booked'])
+                ->with('details')
+                ->get()
+                ->sum(function ($b) {
+                    return $b->details->sum('quantity');
+                });
 
-        BorrowingDetail::create([
-            'borrowing_id' => $borrowing->id,
-            'book_id'      => $book->id,
-            'quantity'     => 1,
-        ]);
+            if ($activeCount >= 5) {
+                return ['error' => 'Gagal booking! Anda sudah mencapai batas maksimal 5 buku (sedang dipinjam / dibooking). Silakan kembalikan buku terlebih dahulu.'];
+            }
 
-        // Kurangi stok buku
-        $book->decrement('stock');
+            $alreadyBooked = Borrowing::where('member_id', $member->id)
+                ->where('status', 'booked')
+                ->whereHas('details', function ($q) use ($bookId) {
+                    $q->where('book_id', $bookId);
+                })->exists();
 
-        return back()->with('success', "Buku '{$book->title}' berhasil dibooking! Silakan ambil di perpustakaan sebelum " . $pickupDeadline->format('d M Y, H:i') . ' WIB.');
+            if ($alreadyBooked) {
+                return ['error' => 'Anda sudah membooking buku ini sebelumnya dan masih menunggu pengambilan.'];
+            }
+
+            $book = Book::where('id', $bookId)->lockForUpdate()->firstOrFail();
+            if ($book->stock < 1) {
+                return ['error' => 'Maaf, stok buku ini sedang habis.'];
+            }
+
+            $borrowing = Borrowing::create([
+                'user_id'         => null, // Diisi nanti oleh petugas saat buku diambil
+                'member_id'       => $member->id,
+                'borrow_date'     => $borrowDate,
+                'due_date'        => $dueDate,
+                'pickup_deadline' => $pickupDeadline,
+                'status'          => 'booked',
+            ]);
+
+            BorrowingDetail::create([
+                'borrowing_id' => $borrowing->id,
+                'book_id'      => $book->id,
+                'quantity'     => 1,
+            ]);
+
+            $book->decrement('stock');
+
+            return ['title' => $book->title];
+        });
+
+        if (isset($result['error'])) {
+            return back()->with('error', $result['error']);
+        }
+
+        return back()->with('success', "Buku '{$result['title']}' berhasil dibooking! Silakan ambil di perpustakaan sebelum " . $pickupDeadline->format('d M Y, H:i') . ' WIB.');
     }
 }

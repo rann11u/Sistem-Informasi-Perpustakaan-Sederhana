@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Borrowing extends Model
 {
@@ -62,24 +63,29 @@ class Borrowing extends Model
      */
     public static function cancelExpiredBookings(): int
     {
-        $expiredList = self::where('status', 'booked')
-            ->whereNotNull('pickup_deadline')
-            ->where('pickup_deadline', '<', now())
-            ->with('details.book')
-            ->get();
+        return DB::transaction(function () {
+            $expiredList = self::where('status', 'booked')
+                ->whereNotNull('pickup_deadline')
+                ->where('pickup_deadline', '<', now())
+                ->with('details')
+                ->lockForUpdate()
+                ->get();
 
-        $count = 0;
-        foreach ($expiredList as $borrowing) {
-            foreach ($borrowing->details as $detail) {
-                if ($detail->book) {
-                    $detail->book->increment('stock', $detail->quantity);
+            $count = 0;
+            foreach ($expiredList as $borrowing) {
+                foreach ($borrowing->details as $detail) {
+                    if ($detail->book_id) {
+                        Book::where('id', $detail->book_id)
+                            ->lockForUpdate()
+                            ->increment('stock', $detail->quantity);
+                    }
                 }
+                $borrowing->status = 'cancelled';
+                $borrowing->save();
+                $count++;
             }
-            $borrowing->status = 'cancelled';
-            $borrowing->save();
-            $count++;
-        }
 
-        return $count;
+            return $count;
+        });
     }
 }

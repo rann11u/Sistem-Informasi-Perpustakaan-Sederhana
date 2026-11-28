@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Book;
 use App\Models\Borrowing;
+use App\Models\BorrowingDetail;
 use App\Models\Member;
 use Carbon\Carbon;
 
@@ -16,7 +17,7 @@ class DashboardController extends Controller
         $totalBookTitles = Book::count();
         $totalBookStock  = (int) Book::sum('stock');
         $totalMembers    = Member::count();
-        $totalBorrowed   = Borrowing::where('status', 'borrowed')->count();
+        $totalBorrowed   = (int) BorrowingDetail::whereHas('borrowing', fn ($q) => $q->where('status', 'borrowed'))->sum('quantity');
         $totalOverdue    = Borrowing::where('status', 'borrowed')
             ->whereDate('due_date', '<', $today)
             ->count();
